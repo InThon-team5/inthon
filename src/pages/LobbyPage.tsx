@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import './LobbyPage.css';
+import { useTheme } from "../ThemeProvider";
 
 // --- 타입 및 데이터 정의 (이전과 동일) ---
 type BattleType = '코테' | '미니';
@@ -213,7 +214,7 @@ const LobbyPage: React.FC = () => {
     const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
 
     // ⭐ 다크 모드 상태
-    const [darkMode, setDarkMode] = useState(false);
+     const { theme, toggleTheme } = useTheme();
 
     // ⭐ 임시 로그인 정보
     const [userInfo] = useState({
@@ -272,7 +273,7 @@ const LobbyPage: React.FC = () => {
 
     return (
         // ⭐ 다크 모드 클래스 동적 적용
-        <div className={`lobby-container ${darkMode ? 'dark-mode' : ''}`}>
+        <div className={`lobby-container ${theme === "dark" ? "dark-mode" : ""}`}>
             {/* 🏆 헤더 (상단) */}
             <div className="lobby-header-final">
                 <button className="exit-btn" onClick={handleExit}>
@@ -281,9 +282,9 @@ const LobbyPage: React.FC = () => {
                 <div className="header-spacer"></div>
 
                 {/* ☀️/🌙 다크 모드 토글 버튼 */}
-                <button className="theme-toggle-btn-lobby" onClick={() => setDarkMode(!darkMode)}>
-                    {darkMode  ? "☀ Light Mode" : "🌙 Dark Mode"}
-                </button>
+                <button className="theme-toggle-btn-lobby" onClick={toggleTheme}>
+  {theme === "dark" ? "☀ Light Mode" : "🌙 Dark Mode"}
+</button>
           
 
                 {/* ⭐ 사용자 정보 표시 영역 */}

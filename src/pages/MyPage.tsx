@@ -1,35 +1,26 @@
-// src/pages/MyPage.tsx
+// MyPage.tsx
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Mypage.css";
-import { useState, useEffect } from "react";
-import { fetchProfile, fetchTechStacks, updateProfile } from "./services/profileApi";
-import type { TechStackRef, Profile } from "./services/profileApi";
+import { useState } from "react";
+import { useTheme } from "../ThemeProvider";
 
 export default function MyPage() {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-
-  // 데모용 최근 전적 (나중에 API 붙이면 교체)
+  const { theme, toggleTheme } = useTheme(); 
   const recentRecords = [
     { id: 1, title: "코딩 배틀 vs 홍길동", date: "2025-11-10", result: "WIN" },
     { id: 2, title: "나 vs 너", date: "2025-11-09", result: "LOSE" },
   ];
 
-  // ===== API 상태 =====
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // 기술 스택 목록 + 선택된 아이디
-  const [techOptions, setTechOptions] = useState<TechStackRef[]>([]);
-  const [selectedTechIds, setSelectedTechIds] = useState<number[]>([]);
+  // 선택된 기술 스택
+  const [selectedTechs, setSelectedTechs] = useState<string[]>([]);
   const [isTechEditorOpen, setIsTechEditorOpen] = useState(false);
 
   // 닉네임
   const [nickname, setNickname] = useState("NickName");
-  const [tempNickname, setTempNickname] = useState("NickName");
+  const [tempNickname, setTempNickname] = useState(nickname);
   const [isNicknameEditorOpen, setIsNicknameEditorOpen] = useState(false);
 
-  // ===== 티어 정보 (멘트 포함) =====
+  // 티어 정보 (멘트 포함)
   const Rank = [
     { id: 1, title: "F", min: 0, max: 399, explain: "코딩의 재앙" },
     { id: 2, title: "D0", min: 400, max: 699, explain: "코딩의 순수 입문자" },
@@ -42,141 +33,55 @@ export default function MyPage() {
     { id: 9, title: "A+", min: 3000, max: Infinity, explain: "코딩의 전설" },
   ];
 
+  // 지금은 안 쓰지만, 나중에 레이팅 연동할 때 쓰라고 남겨둔 함수
   function getRankByRating(rating: number) {
     return Rank.find((r) => rating >= r.min && rating <= r.max);
   }
 
   const closeTechEditor = () => setIsTechEditorOpen(false);
 
-  const toggleTech = (id: number) => {
-    setSelectedTechIds((prev) =>
-      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
+  const TECH_OPTIONS = [
+    "C++",
+    "C",
+    "C#",
+    "TypeScript",
+    "React",
+    "Next.js",
+    "Node.js",
+    "Unity",
+    "Unreal Engine",
+    "Python",
+    "Java",
+    "Spring",
+    "Algorithm",
+    "DataStructure",
+    "OS",
+  ];
+
+  const toggleTech = (tech: string) => {
+    setSelectedTechs((prev) =>
+      prev.includes(tech) ? prev.filter((t) => t !== tech) : [...prev, tech]
     );
   };
 
-  const toggleTheme = () =>
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
 
   const getResultBadgeClass = (result: string) => {
     const upper = result.toUpperCase();
 
-    if (upper.includes("WIN")) return "bg-success";
-    if (upper.includes("LOSE")) return "bg-danger";
+    if (upper.includes("WIN")) return "bg-success";   // 초록색
+    if (upper.includes("LOSE")) return "bg-danger";   // 빨간색
+
+    // 그 밖의 결과 (TOP 3, DRAW 등)는 회색
     return "bg-secondary";
   };
 
-  // ===== 현재 레이팅/티어/진행도 계산 =====
-  const currentRating = profile?.rating ?? 908;
-  const currentRank = getRankByRating(currentRating) ?? Rank[7]; // 기본 A0
-
-  const currentRankIndex = Rank.findIndex((r) => r.id === currentRank.id);
-  const nextRank =
-    currentRankIndex >= 0 && currentRankIndex < Rank.length - 1
-      ? Rank[currentRankIndex + 1]
-      : null;
-
-  let progressPercent = 100;
-  let nextTierLabel = "최고 티어입니다";
-  let nextTierRemainLabel = "";
-
-  if (nextRank) {
-    const rangeSize = nextRank.min - currentRank.min;
-    const filled = currentRating - currentRank.min;
-    progressPercent = Math.min(
-      100,
-      Math.max(0, (filled / rangeSize) * 100)
-    );
-
-    const remain = Math.max(nextRank.min - currentRating, 0);
-    nextTierLabel = nextRank.title;
-    nextTierRemainLabel = `-${remain} pts`;
-  }
-
-  // ===== 마운트 시 프로필/기술스택 불러오기 =====
-  useEffect(() => {
-    const access = localStorage.getItem("loop_access");
-
-    if (!access) {
-      setError("로그인이 필요합니다. 메인 페이지에서 다시 로그인 해주세요.");
-      setIsLoading(false);
-      return;
-    }
-
-    async function load() {
-      try {
-        setIsLoading(true);
-        const [profileRes, techList] = await Promise.all([
-          fetchProfile(access!),
-          fetchTechStacks(),
-        ]);
-
-        setProfile(profileRes);
-
-        const nick = profileRes.nickname || "NickName";
-        setNickname(nick);
-        setTempNickname(nick);
-
-        setTechOptions(techList);
-
-        const techIdsFromProfile =
-          profileRes.tech_stacks?.map((t) => t.id) ?? [];
-        setSelectedTechIds(techIdsFromProfile);
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "프로필 정보를 불러오는 중 오류가 발생했습니다."
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    load();
-  }, []);
-
-  // ===== 기술 스택 저장 (PATCH /api/profile/) =====
-  const handleSaveTechStacks = async () => {
-    const access = localStorage.getItem("loop_access");
-    if (!access) {
-      setError("로그인 정보가 없습니다. 다시 로그인 해주세요.");
-      closeTechEditor();
-      return;
-    }
-
-    try {
-      const updated = await updateProfile(access, {
-        tech_stack_ids: selectedTechIds,
-      });
-      setProfile(updated);
-      setSelectedTechIds(updated.tech_stacks?.map((t) => t.id) ?? []);
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "기술 스택을 저장하는 중 오류가 발생했습니다."
-      );
-    } finally {
-      closeTechEditor();
-    }
-  };
-
   return (
-    <div
-      className={`mypage-root ${
-        theme === "dark" ? "theme-dark" : "theme-light"
-      }`}
-    >
-      {/* 전역 에러 표시 */}
-      {error && (
-        <div className="alert alert-danger text-center m-0 rounded-0">
-          {error}
-        </div>
-      )}
+    <div className={`mypage-root ${theme === "dark" ? "theme-dark" : "theme-light"}`}>
 
       {/* 상단 랭크 + 프로필 */}
       <section className="rank-hero">
         <div className="rank-hero-overlay" />
+        {/* 🔹 오른쪽 위 테마 토글 버튼 */}
         <button className="theme-toggle-btn" onClick={toggleTheme}>
           {theme === "dark" ? "☀ Light Mode" : "🌙 Dark Mode"}
         </button>
@@ -186,33 +91,24 @@ export default function MyPage() {
             {/* 왼쪽: 랭크 정보 */}
             <div className="col-md-5 d-flex flex-column justify-content-center text-md-start text-center rank-left">
               <div className="rank-label mb-2">Game Name</div>
-              <div className="rank-up-text mb-3">
-                RANK {currentRank.title}
-              </div>
+              <div className="rank-up-text mb-3">RANK A0</div>
 
               <div className="d-flex justify-content-md-start justify-content-center align-items-center gap-3 mb-3">
                 <span className="rank-main-letter" />
                 <div className="rank-sub-info">
-                  <div className="rank-tier-name">{currentRank.explain}</div>
-                  <div className="rank-rating">
-                    {currentRating.toLocaleString()} pts
-                  </div>
+                  <div className="rank-tier-name">코딩의 실력자!</div>
+                  <div className="rank-rating">908 pts</div>
                   <div className="rank-percent">정보대 상위 3%</div>
                 </div>
               </div>
 
               <div className="rank-progress-wrap">
                 <div className="d-flex justify-content-between small mb-1">
-                  <span>
-                    다음 티어: {nextRank ? nextTierLabel : "MAX"}
-                  </span>
-                  <span>{nextRank ? nextTierRemainLabel : ""}</span>
+                  <span>다음 티어: A+</span>
+                  <span>-42 pts</span>
                 </div>
                 <div className="progress rank-progress">
-                  <div
-                    className="progress-bar"
-                    style={{ width: `${progressPercent}%` }}
-                  />
+                  <div className="progress-bar" style={{ width: "80%" }} />
                 </div>
               </div>
             </div>
@@ -221,22 +117,15 @@ export default function MyPage() {
             <div className="col-md-7 profile-main-info d-flex justify-content-md-end justify-content-center">
               <div className="profile-card text-center text-md-start">
                 <div className="d-flex flex-column flex-md-row align-items-center gap-4">
+                  {/* 큰 아바타 (배경 이미지로만 사용) */}
                   <div className="d-flex justify-content-md-end justify-content-center">
                     <div className="rank-hero-image" />
                   </div>
 
+                  {/* 닉네임 + 버튼 + 설명 */}
                   <div className="flex-grow-2">
-                    <div className="profile-name">
-                      {nickname}
-                      {isLoading && (
-                        <span className="ms-2 small text-muted">
-                          불러오는 중...
-                        </span>
-                      )}
-                    </div>
-                    <div className="profile-title mb-2">
-                      정보대 코딩 배틀러
-                    </div>
+                    <div className="profile-name">{nickname}</div>
+                    <div className="profile-title mb-2">정보대 코딩 배틀러</div>
 
                     <div className="d-flex flex-wrap gap-2 mb-3">
                       <button className="btn btn-sm btn-outline-light">
@@ -284,29 +173,25 @@ export default function MyPage() {
 
             <div className="card-body">
               <p className="small text-muted mb-3">
-                상단의 <strong>“기술 스택 수정”</strong> 버튼을 눌러 스택을
-                수정하세요.
+                상단의 <strong>“기술 스택 수정”</strong> 버튼을 눌러 스택을 수정하세요.
               </p>
 
               <div className="tech-card-list d-flex flex-wrap gap-4">
-                {selectedTechIds.length === 0 && (
+                {selectedTechs.length === 0 && (
                   <p className="small text-muted m-0">
                     기술 스택을 선택하면 아래에 카드로 표시됩니다.
                   </p>
                 )}
 
-                {selectedTechIds.map((id) => {
-                  const tech = techOptions.find((t) => t.id === id);
-                  if (!tech) return null;
-                  return (
-                    <div key={id} className="neon-tech-card">
-                      <span className="neon-tech-name">{tech.name}</span>
-                    </div>
-                  );
-                })}
+                {selectedTechs.map((tech) => (
+                  <div key={tech} className="neon-tech-card">
+                    <span className="neon-tech-name">{tech}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
+
 
           {/* 최근 전적 카드 */}
           <div className="card mb-3">
@@ -326,11 +211,10 @@ export default function MyPage() {
                       <td className="small text-muted">{r.date}</td>
                       <td>{r.title}</td>
                       <td>
-                        <span
-                          className={`badge ${getResultBadgeClass(r.result)}`}
-                        >
+                        <span className={`badge ${getResultBadgeClass(r.result)}`}>
                           {r.result}
                         </span>
+
                       </td>
                     </tr>
                   ))}
@@ -360,19 +244,19 @@ export default function MyPage() {
 
             <div className="tech-editor-body">
               <div className="d-flex flex-wrap gap-2 mb-3">
-                {techOptions.map((tech) => {
-                  const active = selectedTechIds.includes(tech.id);
+                {TECH_OPTIONS.map((tech) => {
+                  const active = selectedTechs.includes(tech);
                   return (
                     <button
-                      key={tech.id}
+                      key={tech}
                       type="button"
                       className={
                         "btn btn-sm tech-option-btn " +
                         (active ? "tech-option-btn-active" : "")
                       }
-                      onClick={() => toggleTech(tech.id)}
+                      onClick={() => toggleTech(tech)}
                     >
-                      {tech.name}
+                      {tech}
                     </button>
                   );
                 })}
@@ -382,7 +266,7 @@ export default function MyPage() {
             <div className="tech-editor-footer d-flex justify-content-end gap-2">
               <button
                 className="btn btn-sm btn-primary"
-                onClick={handleSaveTechStacks}
+                onClick={closeTechEditor}
               >
                 완료
               </button>
@@ -434,37 +318,9 @@ export default function MyPage() {
 
               <button
                 className="btn btn-sm btn-primary"
-                onClick={async () => {
-                  const newNick = tempNickname.trim();
-                  if (!newNick) {
-                    setIsNicknameEditorOpen(false);
-                    return;
-                  }
-
-                  const access = localStorage.getItem("loop_access");
-                  if (!access) {
-                    setError(
-                      "로그인 정보가 없습니다. 다시 로그인 해주세요."
-                    );
-                    setIsNicknameEditorOpen(false);
-                    return;
-                  }
-
-                  try {
-                    const updated = await updateProfile(access, {
-                      nickname: newNick,
-                    });
-                    setProfile(updated);
-                    setNickname(updated.nickname);
-                  } catch (err) {
-                    setError(
-                      err instanceof Error
-                        ? err.message
-                        : "닉네임을 저장하는 중 오류가 발생했습니다."
-                    );
-                  } finally {
-                    setIsNicknameEditorOpen(false);
-                  }
+                onClick={() => {
+                  setNickname(tempNickname);
+                  setIsNicknameEditorOpen(false);
                 }}
               >
                 저장
