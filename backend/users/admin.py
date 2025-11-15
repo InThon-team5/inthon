@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, Profile, Title, TechStack, Club, Friendship
+from .models import User, Profile, Title, TechStack, Club
 
 
 class ProfileInline(admin.StackedInline):
@@ -57,36 +57,19 @@ class ProfileAdmin(admin.ModelAdmin):
 @admin.register(Title)
 class TitleAdmin(admin.ModelAdmin):
     """칭호 Admin 설정"""
-    list_display = ('name',)
+    list_display = ('id', 'name',)
     search_fields = ('name',)
 
 
 @admin.register(TechStack)
 class TechStackAdmin(admin.ModelAdmin):
     """기술스택 Admin 설정"""
-    list_display = ('name',)
+    list_display = ('id', 'name',)
     search_fields = ('name',)
 
 
 @admin.register(Club)
 class ClubAdmin(admin.ModelAdmin):
     """동아리 Admin 설정"""
-    list_display = ('name',)
+    list_display = ('id', 'name',)
     search_fields = ('name',)
-
-
-@admin.register(Friendship)
-class FriendshipAdmin(admin.ModelAdmin):
-    """친구관계 Admin 설정"""
-    list_display = ('from_profile', 'to_profile', 'status', 'created_at', 'updated_at')
-    list_filter = ('status', 'created_at', 'updated_at')
-    search_fields = ('from_profile__user__email', 'to_profile__user__email', 'from_profile__nickname', 'to_profile__nickname')
-    readonly_fields = ('created_at', 'updated_at')
-    fieldsets = (
-        ('친구 관계', {
-            'fields': ('from_profile', 'to_profile', 'status')
-        }),
-        ('날짜 정보', {
-            'fields': ('created_at', 'updated_at')
-        }),
-    )

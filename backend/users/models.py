@@ -134,62 +134,9 @@ class Profile(models.Model):
         blank=True
     )
     
-    # [수정됨] 친구 관계 M2M 필드 추가
-    # 'self'는 Profile 모델 자신을 가리킵니다.
-    # Friendship 모델을 'through'로 지정하여 중개 모델로 사용합니다.
-    friends = models.ManyToManyField(
-        'self',
-        through='Friendship',
-        through_fields=('from_profile', 'to_profile'), # 중개 모델의 필드명 지정
-        symmetrical=False, # 비대칭 관계
-        related_name='related_friends',
-        blank=True
-    )
-    
     class Meta:
         db_table = '프로필'
     
     def __str__(self):
         # User 모델의 __str__이 email을 반환하므로 self.user.email과 동일
         return f"{self.user}의 프로필"
-
-
-class Friendship(models.Model):
-    """
-    친구관계 모델 (Profile-Profile M2M 중개 모델)
-    - status 등 추가 필드를 가지므로 'through' 모델로 직접 정의합니다.
-    """
-    STATUS_CHOICES = [
-        ('pending', '대기중'),
-        ('accepted', '수락됨'),
-        ('rejected', '거절됨'),
-    ]
-    
-    # [수정됨] User 대신 Profile에 연결
-    from_profile = models.ForeignKey(
-        Profile,
-        on_delete=models.CASCADE,
-        related_name='sent_friendships'
-    )
-    # [수정됨] User 대신 Profile에 연결
-    to_profile = models.ForeignKey(
-        Profile,
-        on_delete=models.CASCADE,
-        related_name='received_friendships'
-    )
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='pending'
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        db_table = '친구관계'
-        # [수정됨] 필드명 변경
-        unique_together = [['from_profile', 'to_profile']]
-    
-    def __str__(self):
-        # [수정됨] Profile 모델의 __str__을 호출
-        return f"{self.from_profile} -> {self.to_profile} ({self.get_status_display()})"
