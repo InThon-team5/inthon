@@ -21,7 +21,9 @@ from rest_framework_simplejwt.views import TokenRefreshView
 urlpatterns = [
     path('admin/', admin.site.urls),
     # /api/users/ (signup, login)
-    path('api/users/', include('users.urls')),
+    # /api/profile/ (프로필 관련)
+    # /api/titles/, /api/tech-stacks/, /api/clubs/ (참조 데이터)
+    path('api/', include('users.urls')),
     # POST /api/token/refresh/ (Access Token 재발급)
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
