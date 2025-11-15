@@ -125,6 +125,7 @@ export default function MainPage() {
       await signupApi({
         email,
         password: pw,
+        nickname: nick,
       });
 
       // 2) 바로 로그인 요청해서 토큰 받기

@@ -14,13 +14,17 @@ export type LoginResponse = {
   refresh: string;
 };
 
+/** 🔥 회원가입 요청에 nickname 추가 */
 export type SignupRequest = {
   email: string;
   password: string;
+  nickname: string;
 };
 
+/** 응답은 필요에 따라, 최소 email + nickname 정도만 */
 export type SignupResponse = {
   email: string;
+  nickname?: string;
 };
 
 export type RefreshResponse = {
@@ -103,6 +107,7 @@ export function loginApi(req: LoginRequest) {
   return postJson<LoginRequest, LoginResponse>("/api/users/login/", req);
 }
 
+/** 🔥 이제 email + password + nickname을 그대로 보냄 */
 export function signupApi(req: SignupRequest) {
   // POST /api/users/signup/
   return postJson<SignupRequest, SignupResponse>("/api/users/signup/", req);

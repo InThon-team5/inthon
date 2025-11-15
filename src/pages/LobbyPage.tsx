@@ -309,9 +309,7 @@ const LobbyPage: React.FC = () => {
         // 1) 토큰 꺼내오기
         // ↓ 이 키 이름은 "로그인할 때 실제로 localStorage에 뭐라고 저장했는지"랑 맞춰야 함
         const token =
-            localStorage.getItem('accessToken') || // 예시
-            localStorage.getItem('jwt') ||
-            localStorage.getItem('token');
+            localStorage.getItem('loop_access');
 
         if (!token) {
             setUserInfo(null);
