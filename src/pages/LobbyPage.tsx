@@ -306,17 +306,15 @@ const LobbyPage: React.FC = () => {
     useEffect(() => {
     const loadInitialData = async () => {
         try {
-        // 1) 토큰 꺼내오기
-        // ↓ 이 키 이름은 "로그인할 때 실제로 localStorage에 뭐라고 저장했는지"랑 맞춰야 함
+        // 1) 토큰 꺼내오기 (로그인 저장 키와 동일하게!)
         const token =
-            localStorage.getItem('accessToken') || // 예시
+            localStorage.getItem('accessToken') ||
             localStorage.getItem('jwt') ||
             localStorage.getItem('token');
 
         if (!token) {
-            // 토큰 없으면 로그인 안 된 상태
             setUserInfo(null);
-            await loadRooms();    // 방 목록은 비로그인이어도 보이게 하고 싶으면
+            await loadRooms(); // 비로그인 상태에서도 방은 보이게 할 거면
             return;
         }
 
@@ -325,14 +323,14 @@ const LobbyPage: React.FC = () => {
 
         setUserInfo({
             nickname: profile.nickname ?? '사용자',
-            tier: (profile.tier as Grade) ?? null,   // 'A+', 'B0' 같은 문자열
+            // tier는 A+, B0, ... 문자열이므로 Grade 유니온으로 캐스팅
+            tier: (profile.tier as Grade) ?? null,
         });
 
         // 3) 방 목록도 같이 로딩
         await loadRooms();
-        } catch (err: any) {
+        } catch (err) {
         console.error(err);
-        // 프로필 로딩 실패 → 일단 비로그인처럼 처리
         setUserInfo(null);
         await loadRooms();
         }
@@ -340,7 +338,6 @@ const LobbyPage: React.FC = () => {
 
     loadInitialData();
     }, []);
-
 
 
   const loadRooms = async () => {
@@ -385,44 +382,43 @@ const LobbyPage: React.FC = () => {
 
   const navigateToMatch = (matchId?: number) => {
     if (!matchId) {
-      // 서버에서 match_id 안 내려주면 나중에 여기 수정
-      alert('방 입장에 성공했습니다. (match_id 없음)');
-      return;
+        alert('방 입장에 성공했습니다. (match_id 없음)');
+        return;
     }
     navigate(`/battles/${matchId}`);
-  };
+    };
 
   const handleEnterRoom = async (room: Room) => {
     if (room.isPrivate) {
-      setSelectedRoom(room);
-      setShowPasswordModal(true);
-      return;
+        setSelectedRoom(room);
+        setShowPasswordModal(true);
+        return;
     }
 
     try {
-      const res = await joinBattleRoom(room.id);
-      navigateToMatch(res.match_id);
+        const res = await joinBattleRoom(room.id);
+        navigateToMatch(res.match_id);
     } catch (e) {
-      console.error(e);
-      alert('방 입장에 실패했습니다.');
+        console.error(e);
+        alert('방 입장에 실패했습니다.');
     }
-  };
+    };
 
-  const handlePasswordConfirm = async (password: string) => {
+    const handlePasswordConfirm = async (password: string) => {
     if (!selectedRoom) return;
 
     try {
-      await verifyRoomPassword(selectedRoom.id, password);
-      const res = await joinBattleRoom(selectedRoom.id);
-      navigateToMatch(res.match_id);
+        await verifyRoomPassword(selectedRoom.id, password);
+        const res = await joinBattleRoom(selectedRoom.id);
+        navigateToMatch(res.match_id);
     } catch (e) {
-      console.error(e);
-      alert('비밀번호가 일치하지 않거나 방 입장에 실패했습니다.');
+        console.error(e);
+        alert('비밀번호가 일치하지 않거나 방 입장에 실패했습니다.');
     } finally {
-      setShowPasswordModal(false);
-      setSelectedRoom(null);
+        setShowPasswordModal(false);
+        setSelectedRoom(null);
     }
-  };
+    };
 
   const handleCreateRoom = async (form: CreateRoomForm) => {
     try {
