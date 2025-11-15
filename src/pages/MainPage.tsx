@@ -1,8 +1,9 @@
 // src/pages/MainPage.tsx
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import "./BattlePage.css";  // Loop 공통 테마
 import "./MainPage.css";    // 메인 페이지 전용 스타일
+import { loginApi, signupApi } from "../services/authAPI";
 
 const KOREA_EMAIL_REGEX = /^[^\s@]+@korea\.ac\.kr$/;
 
@@ -12,7 +13,7 @@ export default function MainPage() {
   // 다크 모드
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // 로그인 토큰 유무 (나중에 실제 토큰으로 교체)
+  // 로그인 토큰 유무 (나중에 전역 상태로 뺄 수도 있음)
   const [hasToken, setHasToken] = useState(false);
 
   // 로그인 / 회원가입 탭 상태
@@ -32,6 +33,14 @@ export default function MainPage() {
 
   const isLoggedIn = hasToken;
 
+  // 새로고침해도 로그인 유지 (localStorage 기반)
+  useEffect(() => {
+    const access = localStorage.getItem("loop_access");
+    if (access) {
+      setHasToken(true);
+    }
+  }, []);
+
   const switchToLogin = () => {
     setAuthMode("login");
     setLoginError("");
@@ -44,8 +53,8 @@ export default function MainPage() {
     setSignupError("");
   };
 
-  // 로그인 처리
-  const handleLoginSubmit = (e: FormEvent<HTMLFormElement>) => {
+  // 로그인 처리 (Django /api/users/login/)
+  const handleLoginSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const trimmedId = loginId.trim();
@@ -61,19 +70,36 @@ export default function MainPage() {
       return;
     }
 
-    // TODO: 로그인 API 호출해서 토큰 받기
-    setLoginError("");
-    setHasToken(true);
+    try {
+      const res = await loginApi({
+        email: trimmedId,
+        password: trimmedPw,
+      });
+
+      // 토큰 저장
+      localStorage.setItem("loop_access", res.access);
+      localStorage.setItem("loop_refresh", res.refresh);
+
+      setLoginError("");
+      setHasToken(true);
+    } catch (err) {
+      console.error(err);
+      setLoginError(
+        err instanceof Error
+          ? err.message
+          : "로그인 중 오류가 발생했습니다."
+      );
+    }
   };
 
-  // 회원가입 처리
-  const handleSignupSubmit = (e: FormEvent<HTMLFormElement>) => {
+  // 회원가입 처리 (Django /api/users/signup/ 후 바로 로그인)
+  const handleSignupSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const email = signupEmail.trim();
     const pw = signupPw.trim();
     const pw2 = signupPwConfirm.trim();
-    const nick = signupNickname.trim();
+    const nick = signupNickname.trim(); // 지금은 백엔드에 안 보내지만 UI용으로 유지
 
     if (!email || !pw || !pw2 || !nick) {
       setSignupError("모든 정보를 입력해주세요.");
@@ -95,14 +121,41 @@ export default function MainPage() {
       return;
     }
 
-    // TODO: 회원가입 API 호출 후 성공 시 토큰 저장
-    setSignupError("");
-    setHasToken(true);
-    setLoginId(email);
+    try {
+      // 1) 회원가입 요청 (email, password만 전송)
+      await signupApi({
+        email,
+        password: pw,
+      });
+
+      // 2) 바로 로그인 요청해서 토큰 받기
+      const loginRes = await loginApi({
+        email,
+        password: pw,
+      });
+
+      localStorage.setItem("loop_access", loginRes.access);
+      localStorage.setItem("loop_refresh", loginRes.refresh);
+
+      setSignupError("");
+      setHasToken(true);
+      setLoginId(email);
+      setAuthMode("login"); // 탭은 로그인 쪽으로 돌려두기
+    } catch (err) {
+      console.error(err);
+      setSignupError(
+        err instanceof Error
+          ? err.message
+          : "회원가입 중 오류가 발생했습니다."
+      );
+    }
   };
 
   const handleLogout = () => {
-    // TODO: 실제 로그아웃 처리 (토큰 삭제)
+    // 토큰 삭제
+    localStorage.removeItem("loop_access");
+    localStorage.removeItem("loop_refresh");
+
     setHasToken(false);
     setLoginId("");
     setLoginPw("");
