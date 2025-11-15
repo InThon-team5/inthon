@@ -180,7 +180,11 @@ export default function MyPage() {
  
 
   return (
-    <div className={`loop-root ${theme === "dark" ? "dark-mode" : ""}`}>
+    <div
+    className={`mypage-root ${
+      theme === "dark" ? "theme-dark" : "theme-light"
+    }`}
+  >
       {/* 전역 에러 표시 */}
       {error && (
         <div className="alert alert-danger text-center m-0 rounded-0">
