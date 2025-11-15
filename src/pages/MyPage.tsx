@@ -31,15 +31,15 @@ export default function MyPage() {
 
   // ===== 티어 정보 (멘트 포함) =====
   const Rank = [
-    { id: 1, title: "F", min: 0, max: 399, explain: "코딩의 재앙" },
-    { id: 2, title: "D0", min: 400, max: 699, explain: "코딩의 순수 입문자" },
-    { id: 3, title: "D+", min: 700, max: 999, explain: "while(true) { 노력 중; }" },
-    { id: 4, title: "C0", min: 1000, max: 1299, explain: "코딩의 새싹 개발자" },
-    { id: 5, title: "C+", min: 1300, max: 1599, explain: "코딩의 모험가" },
-    { id: 6, title: "B0", min: 1600, max: 1999, explain: "코딩의 전략가" },
-    { id: 7, title: "B+", min: 2000, max: 2499, explain: "코딩의 실전 파이터" },
-    { id: 8, title: "A0", min: 2500, max: 2999, explain: "코딩의 실력자" },
-    { id: 9, title: "A+", min: 3000, max: Infinity, explain: "코딩의 전설" },
+    { id: 1, title: "F", min: 0, max: 399, explain: "코딩의 재앙", percent: "정보대 하위 1%" },
+    { id: 2, title: "D0", min: 400, max: 699, explain: "코딩의 순수 입문자", percent: "정보대 하위 10%" },
+    { id: 3, title: "D+", min: 700, max: 999, explain: "while(true) { 노력 중; }", percent: "정보대 하위 25%" },
+    { id: 4, title: "C0", min: 1000, max: 1299, explain: "코딩의 새싹 개발자", percent: "정보대 상위 50%" },
+    { id: 5, title: "C+", min: 1300, max: 1599, explain: "코딩의 모험가", percent: "정보대 상위 20%" },
+    { id: 6, title: "B0", min: 1600, max: 1999, explain: "코딩의 전략가", percent: "정보대 상위 10%" },
+    { id: 7, title: "B+", min: 2000, max: 2499, explain: "코딩의 실전 파이터", percent: "정보대 상위 5%" },
+    { id: 8, title: "A0", min: 2500, max: 2999, explain: "코딩의 실력자", percent: "정보대 상위 2%" },
+    { id: 9, title: "A+", min: 3000, max: Infinity, explain: "코딩의 전설", percent: "정보대 상위 1%" },
   ];
 
   function getRankByRating(rating: number) {
@@ -66,7 +66,7 @@ export default function MyPage() {
   };
 
   // ===== 현재 레이팅/티어/진행도 계산 =====
-  const currentRating = profile?.rating ?? 908;
+  const currentRating = profile?.rating ?? 0;
   const currentRank = getRankByRating(currentRating) ?? Rank[7]; // 기본 A0
 
   const currentRankIndex = Rank.findIndex((r) => r.id === currentRank.id);
@@ -185,7 +185,7 @@ export default function MyPage() {
           <div className="row h-100 align-items-center">
             {/* 왼쪽: 랭크 정보 */}
             <div className="col-md-5 d-flex flex-column justify-content-center text-md-start text-center rank-left">
-              <div className="rank-label mb-2">Game Name</div>
+              <div className="rank-label mb-2">Loop</div>
               <div className="rank-up-text mb-3">
                 RANK {currentRank.title}
               </div>
@@ -197,7 +197,7 @@ export default function MyPage() {
                   <div className="rank-rating">
                     {currentRating.toLocaleString()} pts
                   </div>
-                  <div className="rank-percent">정보대 상위 3%</div>
+                  <div className="rank-percent"> {currentRank.percent} </div>
                 </div>
               </div>
 
