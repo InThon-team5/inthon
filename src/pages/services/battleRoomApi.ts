@@ -3,105 +3,128 @@
 
 // ===== 공통 타입 =====
 
-// 프로필 / 대결방에서 쓰는 랭크 (프로필 tier랑 동일하게 맞추기)
 export type Grade =
-  | 'A+'
-  | 'A0'
-  | 'B+'
-  | 'B0'
-  | 'C+'
-  | 'C0'
-  | 'D+'
-  | 'D0'
-  | 'F';
+  | "A+"
+  | "A0"
+  | "B+"
+  | "B0"
+  | "C+"
+  | "C0"
+  | "D+"
+  | "D0"
+  | "F";
 
-export type BattleType = '코테' | '미니';
-export type RoomStatus = '대기' | '진행';
+export type BattleType = "코테" | "미니";
+export type RoomStatus = "대기" | "진행";
 
-// 실제 화면에서 사용하는 Room 타입
 export interface Room {
   id: number;
-  type: BattleType;         // is_cote -> '코테' / '미니'
+  type: BattleType;
   title: string;
-  tier: Grade;              // host의 rank
-  currentPlayers: number;   // 현재 인원
-  maxPlayers: number;       // 최대 인원
-  status: RoomStatus;       // '대기 중' | '진행 중'
-  isPrivate: boolean;       // 비공개 여부
+  tier: Grade;            // host의 rank
+  currentPlayers: number;
+  maxPlayers: number;
+  status: RoomStatus;     // '대기' | '진행'
+  isPrivate: boolean;
 }
 
-// 대결방 생성에 사용하는 payload
 export interface CreateRoomPayload {
   title: string;
   is_cote: boolean;
   is_private: boolean;
   private_password?: string;
-  problems: number[];       // 아직은 빈 배열로 보내도 되고, 나중에 문제 선택 붙이면 됨
+  problems: number[];
 }
 
-// 백엔드에서 방 목록에 내려줄 DTO 형태 (추정)
-// 필요하면 여기에 필드 더 추가해서 써도 됨 (host_id, host_nickname 등)
+// 백엔드 DTO
 interface BattleRoomDto {
   id: number;
   title: string;
   is_cote: boolean;
   is_private: boolean;
-  status: string;              // 예: 'WAITING', 'IN_PROGRESS' 등
+  status: string;            // "WAITING" | "IN_PROGRESS"
   current_players: number;
   max_players: number;
-  host_rank?: Grade;            // host 프로필 rank 조인해서 내려주기
-  // host_id?: number;
-  // host_nickname?: string;
+  host_rank?: Grade;
 }
 
-interface JoinRoomResponse {
-  match_id?: number;
-}
+// 방 입장 응답 (join)
+export type JoinRoomResponse = {
+  id: number; // ✅ match_id
+  room: {
+    id: number;
+    title: string;
+    is_cote: boolean;
+    status: { id: number; name: string };
+    is_private: boolean;
+    problems: {
+      id: number;
+      title: string;
+      description: string;
+    }[];
+  };
+  guest: {
+    id: number;
+    email: string;
+  } | null;
+  winner: null | {
+    id: number;
+    email: string;
+  };
+};
 
-// 전적 조회 DTO (구체 필드는 백엔드에 맞춰 자유롭게)
-export interface MatchDto {
-  id: number;
-  [key: string]: any;
-}
+// 결과 전송 응답
+export type SubmitResultBodyBase = {
+  remaining_time_percent: number;
+  accuracy_percent: number;
+};
 
-// 제출 생성/조회 DTO (일단 any 허용해 두고, 나중에 맞춰도 됨)
-export interface SubmissionPayload {
-  [key: string]: any;
-}
-
-export interface SubmissionDto {
-  id: number;
-  [key: string]: any;
-}
+export type SubmitResultResponse = {
+  message: string;
+  my_result: {
+    id: number;
+    user: { id: number; email: string };
+    remaining_time_percent: number;
+    accuracy_percent: number;
+    total_score: number;
+    result: "win" | "lose" | "draw";
+    submitted_at: string;
+  };
+  opponent_result?: {
+    id: number;
+    user: { id: number; email: string };
+    remaining_time_percent: number;
+    accuracy_percent: number;
+    total_score: number;
+    result: "win" | "lose" | "draw";
+    submitted_at: string;
+  };
+  is_complete: boolean;
+  my_result_status?: "win" | "lose" | "draw";
+  opponent_result_status?: "win" | "lose" | "draw";
+};
 
 // ===== 공통 유틸 =====
 
-// ✅ profileApi랑 동일한 규칙으로 base URL
 const API_BASE_URL =
-  // Vite 기준. 환경변수 없으면 상대 경로로 요청
-  import.meta.env.VITE_API_BASE_URL;
+  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
 function getAuthHeaders(): Record<string, string> {
-  // 로그인할 때 localStorage에 저장한 키와 맞추기
-  const token = localStorage.getItem('loop_access');
-  return token
-    ? { Authorization: `Bearer ${token}` }
-    : {};
+  const token = localStorage.getItem("loop_access");
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 function mapStatus(status: string): RoomStatus {
-  if (status === 'IN_PROGRESS' || status === 'PLAYING') return '진행';
-  return '대기';
+  if (status === "IN_PROGRESS" || status === "PLAYING") return "진행";
+  return "대기";
 }
 
 function mapBattleType(is_cote: boolean): BattleType {
-  return is_cote ? '코테' : '미니';
+  return is_cote ? "코테" : "미니";
 }
 
 function mapRoomDto(dto: BattleRoomDto): Room {
-  // ensure tier is always present; fallback to 'F' if backend didn't provide it
-  const tier: Grade = dto.host_rank ?? 'F';
-
+  const tier: Grade = dto.host_rank ?? "F";
   return {
     id: dto.id,
     title: dto.title,
@@ -114,86 +137,116 @@ function mapRoomDto(dto: BattleRoomDto): Room {
   };
 }
 
-// ✅ 방 목록 조회: GET /api/battles/rooms/
+// ===== API 함수들 =====
+
+// 방 목록
 export async function fetchBattleRooms(): Promise<Room[]> {
   const res = await fetch(`${API_BASE_URL}/api/battles/rooms/`, {
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...getAuthHeaders(),
     },
   });
 
-    if (!res.ok) {
-      throw new Error('방 목록을 불러오지 못했습니다.');
-    }
-
-    const data: BattleRoomDto[] = await res.json();
-    return data.map(mapRoomDto);
+  if (!res.ok) {
+    throw new Error("방 목록을 불러오지 못했습니다.");
   }
 
-// ✅ 방 생성: POST /api/battles/rooms/
+  const data: BattleRoomDto[] = await res.json();
+  return data.map(mapRoomDto);
+}
+
+// 방 생성
 export async function createBattleRoom(
-  payload: CreateRoomPayload,
+  payload: CreateRoomPayload
 ): Promise<Room> {
   const res = await fetch(`${API_BASE_URL}/api/battles/rooms/`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      ...getAuthHeaders(), // JWT 필요
+      "Content-Type": "application/json",
+      ...getAuthHeaders(),
     },
     body: JSON.stringify(payload),
   });
 
-    if (!res.ok) {
-      throw new Error('대결 방 생성에 실패했습니다.');
-    }
-
-    const dto: BattleRoomDto = await res.json();
-    return mapRoomDto(dto);
+  if (!res.ok) {
+    throw new Error("대결 방 생성에 실패했습니다.");
   }
 
-// ✅ 비공개 방 비밀번호 확인: POST /api/battles/rooms/{room_id}/verify-password/
+  const dto: BattleRoomDto = await res.json();
+  return mapRoomDto(dto);
+}
+
+// 비공개 방 비밀번호 확인
 export async function verifyRoomPassword(
   roomId: number,
-  password: string,
+  password: string
 ): Promise<void> {
   const res = await fetch(
     `${API_BASE_URL}/api/battles/rooms/${roomId}/verify-password/`,
     {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...getAuthHeaders(),
       },
       body: JSON.stringify({ password }),
-    },
+    }
   );
 
   if (!res.ok) {
-    // 400/401/403 등으로 실패 내려준다고 가정
-    throw new Error('비밀번호가 일치하지 않습니다.');
+    throw new Error("비밀번호가 일치하지 않습니다.");
   }
 }
 
-// ✅ 방 입장: POST /api/battles/rooms/{room_id}/join/
+// 방 입장 (join)
 export async function joinBattleRoom(
   roomId: number,
+  password?: string
 ): Promise<JoinRoomResponse> {
   const res = await fetch(
     `${API_BASE_URL}/api/battles/rooms/${roomId}/join/`,
     {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         ...getAuthHeaders(),
       },
-      body: JSON.stringify({}), // body 필요 없으면 비워두기
-    },
+      body: JSON.stringify(password ? { password } : {}),
+    }
   );
 
   if (!res.ok) {
-    throw new Error('대결 방 입장에 실패했습니다.');
+    throw new Error("방 입장에 실패했습니다.");
   }
 
-    return res.json();
+  const data = (await res.json()) as JoinRoomResponse;
+  console.log("[joinBattleRoom] response =", data);
+  return data;
+}
+
+// 결과 전송 (submit-result)
+//   POST /api/battles/rooms/{room_id}/submit-result/
+export async function submitBattleResult(
+  roomId: number,
+  body: SubmitResultBodyBase
+): Promise<SubmitResultResponse> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/battles/rooms/${roomId}/submit-result/`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify(body),
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("결과 전송에 실패했습니다.");
   }
+
+  return (await res.json()) as SubmitResultResponse;
+}
+

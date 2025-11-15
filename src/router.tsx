@@ -8,6 +8,6 @@ import MyPage from "./pages/MyPage";
 export const router = createBrowserRouter([
   { path: "/", element: <MainPage /> },
   { path: "/lobby", element: <LobbyPage /> },
-  { path: "/battle/:matchId", element: <BattlePage /> },
+  { path: "/battle/:roomId", element: <BattlePage /> },
   { path: "/me", element: <MyPage /> },
 ]);
