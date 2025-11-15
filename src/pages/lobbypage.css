@@ -710,7 +710,7 @@ input:checked + .slider:before {
 .theme-toggle-btn-lobby {
   position: absolute;
   right: 360px;
-  top: 37px;
+  top: 40px;
   z-index: 2;
   padding: 6px 14px;
   font-size: 0.8rem;
