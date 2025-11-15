@@ -1,7 +1,7 @@
 // src/router.tsx
 import { createBrowserRouter } from "react-router-dom";
 import MainPage from "./pages/MainPage";
-import LobbyPage from "./pages/lobbypage";
+import LobbyPage from "./pages/LobbyPage";
 import BattlePage from "./pages/BattlePage";
 import MyPage from "./pages/MyPage";
 
