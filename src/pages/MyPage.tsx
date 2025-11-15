@@ -1,17 +1,23 @@
-// src/pages/MyPage.tsx
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Mypage.css";
 import { useState, useEffect } from "react";
 import {
   fetchProfile,
   fetchTechStacks,
+  fetchTitles,
+  fetchClubs,
   updateProfile,
   type TechStackRef,
+  type TitleRef,
+  type ClubRef,
   type Profile,
 } from "./services/profileApi";
+import { useNavigate } from "react-router-dom";
 
 export default function MyPage() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  const navigate = useNavigate();
 
   // 데모용 최근 전적 (나중에 API 붙이면 교체)
   const recentRecords = [
@@ -24,7 +30,7 @@ export default function MyPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 기술 스택 목록 + 선택된 아이디
+  // 기술 스택
   const [techOptions, setTechOptions] = useState<TechStackRef[]>([]);
   const [selectedTechIds, setSelectedTechIds] = useState<number[]>([]);
   const [isTechEditorOpen, setIsTechEditorOpen] = useState(false);
@@ -33,6 +39,16 @@ export default function MyPage() {
   const [nickname, setNickname] = useState("NickName");
   const [tempNickname, setTempNickname] = useState("NickName");
   const [isNicknameEditorOpen, setIsNicknameEditorOpen] = useState(false);
+
+  // 소속(동아리)
+  const [clubOptions, setClubOptions] = useState<ClubRef[]>([]);
+  const [selectedClubIds, setSelectedClubIds] = useState<number[]>([]);
+  const [isClubEditorOpen, setIsClubEditorOpen] = useState(false);
+
+  // 칭호
+  const [titleOptions, setTitleOptions] = useState<TitleRef[]>([]);
+  const [selectedTitleId, setSelectedTitleId] = useState<number | null>(null);
+  const [isTitleEditorOpen, setIsTitleEditorOpen] = useState(false);
 
   // ===== 티어 정보 (멘트 포함) =====
   const Rank = [
@@ -57,6 +73,16 @@ export default function MyPage() {
     setSelectedTechIds((prev) =>
       prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
     );
+  };
+
+  const toggleClub = (id: number) => {
+    setSelectedClubIds((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectTitle = (id: number | null) => {
+    setSelectedTitleId(id);
   };
 
   const toggleTheme = () =>
@@ -87,17 +113,20 @@ export default function MyPage() {
   if (nextRank) {
     const rangeSize = nextRank.min - currentRank.min;
     const filled = currentRating - currentRank.min;
-    progressPercent = Math.min(
-      100,
-      Math.max(0, (filled / rangeSize) * 100)
-    );
+    progressPercent = Math.min(100, Math.max(0, (filled / rangeSize) * 100));
 
     const remain = Math.max(nextRank.min - currentRating, 0);
     nextTierLabel = nextRank.title;
     nextTierRemainLabel = `-${remain} pts`;
   }
 
-  // ===== 마운트 시 프로필/기술스택 불러오기 =====
+  // 칭호 선택 옵션 (나중에 소속별 제한 생기면 여기서 필터링)
+  const selectableTitles =
+    profile && profile.titles && profile.titles.length > 0
+      ? profile.titles
+      : titleOptions;
+
+  // ===== 마운트 시 프로필/참조 데이터 불러오기 =====
   useEffect(() => {
     const access = localStorage.getItem("loop_access");
 
@@ -110,9 +139,11 @@ export default function MyPage() {
     async function load() {
       try {
         setIsLoading(true);
-        const [profileRes, techList] = await Promise.all([
+        const [profileRes, techList, titleList, clubList] = await Promise.all([
           fetchProfile(access!),
           fetchTechStacks(),
+          fetchTitles(),
+          fetchClubs(),
         ]);
 
         setProfile(profileRes);
@@ -122,10 +153,17 @@ export default function MyPage() {
         setTempNickname(nick);
 
         setTechOptions(techList);
+        setTitleOptions(titleList);
+        setClubOptions(clubList);
 
         const techIdsFromProfile =
           profileRes.tech_stacks?.map((t) => t.id) ?? [];
         setSelectedTechIds(techIdsFromProfile);
+
+        const clubIdsFromProfile = profileRes.clubs?.map((c) => c.id) ?? [];
+        setSelectedClubIds(clubIdsFromProfile);
+
+        setSelectedTitleId(profileRes.activate_title?.id ?? null);
       } catch (err) {
         setError(
           err instanceof Error
@@ -150,11 +188,8 @@ export default function MyPage() {
     }
 
     try {
-      // 서버에 내가 고른 스택 id 목록만 보내기
       await updateProfile(access, { tech_stack_ids: selectedTechIds });
 
-      // 응답으로 selectedTechIds를 다시 덮지 말고,
-      // 프론트에서 프로필 객체만 맞춰서 업데이트
       setProfile((prev) =>
         prev
           ? {
@@ -176,6 +211,67 @@ export default function MyPage() {
     }
   };
 
+  // ===== 소속(동아리) 저장 =====
+  const handleSaveClubs = async () => {
+    const access = localStorage.getItem("loop_access");
+    if (!access) {
+      setError("로그인 정보가 없습니다. 다시 로그인 해주세요.");
+      setIsClubEditorOpen(false);
+      return;
+    }
+
+    try {
+      // 1) 서버에는 id 배열만 보냄
+      await updateProfile(access, { club_ids: selectedClubIds });
+
+      // 2) 응답에 clubs가 있든 없든,
+      //    프론트에서 현재 선택 상태로 profile.clubs를 직접 맞춰준다.
+      setProfile((prev) =>
+        prev
+          ? {
+              ...prev,
+              clubs: clubOptions.filter((c) =>
+                selectedClubIds.includes(c.id)
+              ),
+            }
+          : prev
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "소속을 저장하는 중 오류가 발생했습니다."
+      );
+    } finally {
+      setIsClubEditorOpen(false);
+    }
+  };
+
+
+  // ===== 칭호 저장 (활성 칭호) =====
+  const handleSaveActiveTitle = async () => {
+    const access = localStorage.getItem("loop_access");
+    if (!access) {
+      setError("로그인 정보가 없습니다. 다시 로그인 해주세요.");
+      setIsTitleEditorOpen(false);
+      return;
+    }
+
+    try {
+      const updated = await updateProfile(access, {
+        activate_title: selectedTitleId,
+      });
+      setProfile(updated);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "칭호를 저장하는 중 오류가 발생했습니다."
+      );
+    } finally {
+      setIsTitleEditorOpen(false);
+    }
+  };
 
   return (
     <div
@@ -251,11 +347,14 @@ export default function MyPage() {
                       )}
                     </div>
                     <div className="profile-title mb-2">
-                      정보대 코딩 배틀러
+                      {profile?.activate_title? profile.activate_title.name : "칭호 없음"}
                     </div>
 
                     <div className="d-flex flex-wrap gap-2 mb-3">
-                      <button className="btn btn-sm btn-outline-light">
+                      <button
+                        className="btn btn-sm btn-outline-light"
+                        onClick={() => { setIsTitleEditorOpen(true)}}
+                      >
                         칭호 수정
                       </button>
                       <button
@@ -273,15 +372,28 @@ export default function MyPage() {
                       >
                         닉네임 변경
                       </button>
-                      <button className="btn btn-sm btn-primary">
-                        프로필 편집
+                      <button
+                        className="btn btn-sm btn-primary"
+                        onClick={() => setIsClubEditorOpen(true)}
+                      >
+                        소속 수정
                       </button>
                     </div>
 
                     <div className="profile-summary">
                       오늘도 코딩 배틀 중... <br />
                       최근 10판 승률 73% <br />
-                      평균 해결 시간 12분.
+                      평균 해결 시간 12분. <br />
+                      {profile?.clubs && profile.clubs.length > 0 ? (
+                        <span className="small text-muted">
+                          소속:{" "}
+                          {profile.clubs.map((c) => c.name).join(", ")}
+                        </span>
+                      ) : (
+                        <span className="small text-muted">
+                          소속이 아직 설정되지 않았습니다.
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -357,6 +469,8 @@ export default function MyPage() {
         </div>
       </main>
 
+      {/* ───────── 모달들 ───────── */}
+
       {/* 기술 스택 수정 모달 */}
       {isTechEditorOpen && (
         <div className="tech-editor-backdrop" onClick={closeTechEditor}>
@@ -401,6 +515,139 @@ export default function MyPage() {
                 onClick={handleSaveTechStacks}
               >
                 완료
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 소속 수정 모달 */}
+      {isClubEditorOpen && (
+        <div
+          className="tech-editor-backdrop"
+          onClick={() => setIsClubEditorOpen(false)}
+        >
+          <div
+            className="tech-editor-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="tech-editor-header">
+              <h5 className="mb-0">소속 수정</h5>
+              <button
+                type="button"
+                className="btn-close btn-close-white"
+                aria-label="Close"
+                onClick={() => setIsClubEditorOpen(false)}
+              />
+            </div>
+
+            <div className="tech-editor-body">
+              <p className="small text-muted mb-2">
+                동아리를 선택하면 마이페이지와 배틀에서 표시됩니다.
+              </p>
+              <div className="d-flex flex-wrap gap-2 mb-3">
+                {clubOptions.map((club) => {
+                  const active = selectedClubIds.includes(club.id);
+                  return (
+                    <button
+                      key={club.id}
+                      type="button"
+                      className={
+                        "btn btn-sm tech-option-btn " +
+                        (active ? "tech-option-btn-active" : "")
+                      }
+                      onClick={() => toggleClub(club.id)}
+                    >
+                      {club.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="tech-editor-footer d-flex justify-content-end gap-2">
+              <button
+                className="btn btn-sm btn-primary"
+                onClick={handleSaveClubs}
+              >
+                저장
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 칭호 수정 모달 */}
+      {isTitleEditorOpen && (
+        <div
+          className="tech-editor-backdrop"
+          onClick={() => setIsTitleEditorOpen(false)}
+        >
+          <div
+            className="tech-editor-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="tech-editor-header">
+              <h5 className="mb-0">칭호 수정</h5>
+              <button
+                type="button"
+                className="btn-close btn-close-white"
+                aria-label="Close"
+                onClick={() => { setIsTitleEditorOpen(false);}}
+              />
+            </div>
+
+            <div className="tech-editor-body">
+              <p className="small text-muted mb-2">
+                사용할 칭호를 선택하세요. (소속 규칙은 나중에 여기에 반영)
+              </p>
+
+              <div className="d-flex flex-wrap gap-2 mb-3">
+                {selectableTitles.length === 0 ? (
+                  <p className="small text-muted m-0">
+                    선택할 수 있는 칭호가 없습니다.
+                  </p>
+                ) : (
+                  selectableTitles.map((title) => (
+                    <button
+                      key={title.id}
+                      type="button"
+                      className={
+                        "btn btn-sm tech-option-btn " +
+                        (selectedTitleId === title.id
+                          ? "tech-option-btn-active"
+                          : "")
+                      }
+                      onClick={() => handleSelectTitle(title.id)}
+                    >
+                      {title.name}
+                    </button>
+                  ))
+                )}
+              </div>
+
+              <div className="form-check mt-1">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="noTitle"
+                  checked={selectedTitleId === null}
+                  onChange={(e) => {
+                    if (e.target.checked) handleSelectTitle(null);
+                  }}
+                />
+                <label className="form-check-label small" htmlFor="noTitle">
+                  칭호 사용 안 함
+                </label>
+              </div>
+            </div>
+
+            <div className="tech-editor-footer d-flex justify-content-end gap-2">
+              <button
+                className="btn btn-sm btn-primary"
+                onClick={async () => { await handleSaveActiveTitle(); window.location.reload();}}
+              >
+                저장
               </button>
             </div>
           </div>
