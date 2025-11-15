@@ -11,8 +11,6 @@ const KOREA_EMAIL_REGEX = /^[^\s@]+@korea\.ac\.kr$/;
 export default function MainPage() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
-  // 다크 모드
-  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // 로그인 토큰 유무 (나중에 전역 상태로 뺄 수도 있음)
   const [hasToken, setHasToken] = useState(false);

@@ -27,8 +27,8 @@ type Question = {
 
 export default function BattlePage() {
   const { matchId } = useParams();
-  const myNickname = "Jiwan"; // TODO: auth 연동
-  const enemyNickname = "S.Duck"; // TODO: 매칭 정보 연동
+  const myNickname = "Jiwan"; 
+  const enemyNickname = "S.Duck"; 
 
   const [stage, setStage] = useState<BattleStage>("waiting");
   const [secondsLeft, setSecondsLeft] = useState(BATTLE_DURATION);
