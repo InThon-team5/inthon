@@ -1,223 +1,401 @@
-// src/pages/BattlePage.tsx
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { BattleIntroOverlay } from "../components/BattleIntroOverlay";
+import "./BattlePage.css";
 
-type Stage = "waiting" | "intro" | "playing";
+const BATTLE_DURATION = 180; // 3분
+const TOTAL_QUESTIONS = 5;
+
+type BattleStage = "waiting" | "intro" | "playing" | "finished";
+
+type ChatMessage = {
+  id: number;
+  sender: "me" | "opponent";
+  text: string;
+};
 
 export default function BattlePage() {
   const { matchId } = useParams();
+  const myNickname = "Jiwan"; // TODO: auth 연동
+  const enemyNickname = "S.Duck"; // TODO: 매칭 정보 연동
 
-  // TODO: 나중에 authStore에서 가져오기
-  const myNickname = "Jiwan"; 
+  const [stage, setStage] = useState<BattleStage>("waiting");
+  const [secondsLeft, setSecondsLeft] = useState(BATTLE_DURATION);
 
-  // TODO: 나중에 서버에서 상대 닉네임 들어오면 setEnemyNickname 호출
-  const [enemyNickname, setEnemyNickname] = useState<string | null>(null);
+  const [answer, setAnswer] = useState("");
+  const [chatInput, setChatInput] = useState("");
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { id: 1, sender: "opponent", text: "GLHF 👋" },
+  ]);
 
-  const [stage, setStage] = useState<Stage>("waiting");
+  // 상대 진행 상황 (나중에 소켓/서버 이벤트로 교체)
+  const [opponentSolved, setOpponentSolved] = useState(0);
+  const [opponentStatusMessage, setOpponentStatusMessage] = useState(
+    "상대가 아직 문제를 풀고 있습니다."
+  );
 
-  // enemyNickname이 생기면 VS 인트로 → 일정 시간 뒤 playing으로 전환
+  // 라이트/다크 모드
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // 모달
+  const [showTimeUpModal, setShowTimeUpModal] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false);
+
+  // DEV: 입장 후 1.2초 뒤 intro 로 전환
   useEffect(() => {
-    if (enemyNickname && stage === "waiting") {
-      setStage("intro");
-      const timer = setTimeout(() => {
-        setStage("playing");
-      }, 1500); // 1.5초 후에 실제 배틀 화면으로
+    if (stage !== "waiting") return;
+    const id = setTimeout(() => setStage("intro"), 1200);
+    return () => clearTimeout(id);
+  }, [stage]);
 
-      return () => clearTimeout(timer);
+  // playing 시작 시 타이머 리셋
+  useEffect(() => {
+    if (stage === "playing") {
+      setSecondsLeft(BATTLE_DURATION);
     }
-  }, [enemyNickname, stage]);
+  }, [stage]);
 
-  // ---- 개발용: 버튼 눌러서 상대 입장 시뮬레이션 ----
-  const mockJoinEnemy = () => {
-    if (!enemyNickname) {
-      setEnemyNickname("Enemy123");
+  // 타이머 감소
+  useEffect(() => {
+    if (stage !== "playing") return;
+    if (secondsLeft <= 0) return;
+
+    const timer = setInterval(() => {
+      setSecondsLeft((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [stage, secondsLeft]);
+
+  // 00:00 → 무승부 모달
+  useEffect(() => {
+    if (stage === "playing" && secondsLeft === 0) {
+      setStage("finished");
+      setShowTimeUpModal(true);
+      // TODO: 서버에 무승부 결과 전송
     }
+  }, [secondsLeft, stage]);
+
+  const formattedTime = () => {
+    const m = Math.floor(secondsLeft / 60)
+      .toString()
+      .padStart(2, "0");
+    const s = (secondsLeft % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
   };
-  // ---------------------------------------------
+
+  const handleSubmitAnswer = () => {
+    if (!answer.trim()) return;
+    console.log("제출된 답안:", answer);
+    // TODO: 서버 제출 + 상대 진행 상황 업데이트
+    alert("답안을 제출했습니다! (나중에 API 연동 예정)");
+  };
+
+  const handleSendChat = () => {
+    if (!chatInput.trim()) return;
+    setMessages((prev) => [
+      ...prev,
+      { id: prev.length + 1, sender: "me", text: chatInput.trim() },
+    ]);
+    setChatInput("");
+  };
+
+  const handleClickExit = () => {
+    setShowExitModal(true);
+  };
+
+  const handleConfirmExit = () => {
+    setShowExitModal(false);
+    // TODO: 실제 나가기 로직 (라우팅 / 결과 처리)
+    window.history.back();
+  };
+
+  const isPlaying = stage === "playing";
+
+  const opponentProgressPercent =
+    (opponentSolved / TOTAL_QUESTIONS) * 100;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 flex flex-col gap-4 relative">
-      {/* VS 인트로 오버레이 */}
-      {stage === "intro" && enemyNickname && (
-        <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/80">
-          <div className="text-center">
-            <div className="text-sm uppercase tracking-[0.3em] text-slate-400 mb-2">
-              Battle Start
-            </div>
-            <div className="flex items-center gap-4 justify-center">
-              <span className="text-3xl md:text-5xl font-extrabold tracking-widest animate-pulse text-emerald-400">
-                {myNickname}
-              </span>
-              <span className="text-2xl md:text-4xl font-black text-slate-300">
-                VS
-              </span>
-              <span className="text-3xl md:text-5xl font-extrabold tracking-widest animate-pulse text-rose-400">
-                {enemyNickname}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 상단 헤더 */}
-      <header className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl text-emerald-400 font-bold">Battle #{matchId}</h2>
-          <h2 className="text-xl font-bold">
-            Battle #{matchId}
-          </h2>
-          <p className="text-xs text-slate-400">
-            OS / 자료구조 / 알고리즘 등 카테고리 텍스트
-          </p>
+    <div className={`loop-root ${isDarkMode ? "dark-mode" : ""}`}>
+      {/* 상단 글로벌 바 */}
+      <div className="loop-topbar">
+        <div className="loop-brand">
+          <div className="loop-logo">🔥</div>
+          <span className="loop-brand-name">Loop</span>
         </div>
 
-        <div className="flex flex-col items-end gap-1">
-          <div className="flex gap-2 text-sm">
-            <span className="px-2 py-1 rounded-full bg-slate-800">
-              {myNickname}
+        <div className="loop-topbar-right">
+          <button
+            type="button"
+            className="loop-theme-toggle"
+            onClick={() => setIsDarkMode((prev) => !prev)}
+          >
+            <span className="loop-theme-dot" />
+            <span className="loop-theme-label">
+              {isDarkMode ? "Dark Mode" : "Light Mode"}
             </span>
-            <span className="px-2 py-1 rounded-full bg-slate-800">
-              {enemyNickname ?? "waiting..."}
-            </span>
+          </button>
+          <span className="loop-version">v0.1</span>
+        </div>
+      </div>
+
+      {/* 메인 헤더 */}
+      <header className="loop-header">
+        <div className="loop-match-info">
+          <div className="loop-match-label">
+            Battle #{matchId ?? "1"}
           </div>
-          <div className="text-right">
-            <div className="text-xs text-slate-400">남은 시간</div>
-            <div className="text-2xl font-mono">03:00</div>
+          <div className="loop-vs-row">
+            <span className="loop-player-me">{myNickname}</span>
+            <span className="loop-vs">vs</span>
+            <span className="loop-player-enemy">{enemyNickname}</span>
           </div>
+          <div className="loop-category-text">
+            카테고리: OS / 자료구조 / 알고리즘
+          </div>
+        </div>
+
+        <div className="loop-header-right">
+          <div className="loop-timer">
+            <div className="loop-timer-label">남은 시간</div>
+            <div className="loop-timer-value">{formattedTime()}</div>
+          </div>
+          <button
+            className="loop-exit-btn"
+            type="button"
+            onClick={handleClickExit}
+          >
+            나가기
+          </button>
         </div>
       </header>
 
-      {/* 본문 */}
+      {/* 상대 대기 배너 */}
       {stage === "waiting" && (
-        <WaitingView
+        <div className="loop-wait-banner">
+          상대를 기다리는 중입니다...
+        </div>
+      )}
+
+      {/* 메인 영역 */}
+      <main className="loop-main">
+        {/* 왼쪽: 문제 카드 */}
+        <section className="loop-left">
+          <div className="loop-question-card">
+            {/* 상단 태그 */}
+            <div className="loop-question-top">
+              <div className="loop-question-tags">
+                <span className="loop-q-badge">Q1</span>
+                <div className="loop-tag-list">
+                  <span className="loop-tag-chip">OS 기본</span>
+                  <span className="loop-tag-chip">단답형</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 현재 문제 정보 */}
+            <div className="loop-current-meta">
+              <span className="loop-current-pill">현재 문제</span>
+              <span className="loop-current-index">
+                <span className="loop-current-index-strong">1 / 5</span>  
+              </span>
+            </div>
+
+            {/* 문제 텍스트 */}
+            <div className="loop-question-body">
+              <p className="loop-question-title">
+                [예시 문제] 프로세스와 스레드의 차이를 간단히 설명하고,
+                멀티스레딩의 장점 2가지를 서술하시오.
+              </p>
+              <p className="loop-question-subtext">
+                실제 구현에서는 서버에서 받은 요청 테스트를 이 영역에
+                렌더링하면 됩니다. 긴 문제도 스크롤 되도록 처리되어
+                있습니다.
+              </p>
+            </div>
+
+            {/* 답안 입력 */}
+            <div className="loop-answer-section">
+              <div className="loop-answer-header">
+                <div className="loop-answer-title-wrap">
+                  <div className="loop-answer-bar" />
+                  <span className="loop-answer-title">답안 작성</span>
+                </div>
+                <span className="loop-answer-tip">
+                  여기서 바로 답안을 작성하면 유리합니다 🔥
+                </span>
+              </div>
+
+              <textarea
+                value={answer}
+                onChange={(e) => setAnswer(e.target.value)}
+                disabled={!isPlaying}
+                className="loop-answer-textarea"
+                placeholder={
+                  isPlaying
+                    ? "여기에 답안을 작성하세요. (코드, 단답, 서술형 등)"
+                    : "배틀 시작 후 답안을 작성할 수 있습니다."
+                }
+              />
+
+              <button
+                type="button"
+                onClick={handleSubmitAnswer}
+                disabled={!isPlaying || !answer.trim()}
+                className="loop-primary-btn loop-answer-submit"
+              >
+                정답 제출
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* 오른쪽: 상대 진행 상황 + 채팅 */}
+        <section className="loop-right">
+          {/* 상대 진행 카드 */}
+          <div className="loop-opponent-card">
+            <div className="loop-opponent-header">
+              <span className="loop-subtitle">상대 진행 상황</span>
+              <span className="loop-opponent-name">{enemyNickname}</span>
+            </div>
+
+            <div className="loop-progress-row">
+              <div className="loop-progress-bar">
+                <div
+                  className="loop-progress-fill"
+                  style={{ width: `${opponentProgressPercent}%` }}
+                />
+              </div>
+              <span className="loop-progress-text">
+                {opponentSolved} / {TOTAL_QUESTIONS}
+              </span>
+            </div>
+
+            <p className="loop-opponent-message">
+              {opponentStatusMessage}
+            </p>
+          </div>
+
+          {/* 채팅 카드 */}
+          <div className="loop-chat-card">
+            <div className="loop-chat-header">
+              <h3 className="loop-subtitle">실시간 채팅</h3>
+              <span className="loop-chat-hint">
+                매너 채팅 부탁드립니다 🙏
+              </span>
+            </div>
+
+            <div className="loop-chat-body">
+              {messages.map((m) => (
+                <div
+                  key={m.id}
+                  className={
+                    m.sender === "me"
+                      ? "loop-chat-row loop-chat-row-me"
+                      : "loop-chat-row"
+                  }
+                >
+                  <div
+                    className={
+                      m.sender === "me"
+                        ? "loop-chat-bubble loop-chat-bubble-me"
+                        : "loop-chat-bubble"
+                    }
+                  >
+                    {m.text}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="loop-chat-input-row">
+              <input
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleSendChat();
+                  }
+                }}
+                disabled={!isPlaying}
+                className="loop-chat-input"
+                placeholder={
+                  isPlaying
+                    ? "메시지 입력 후 Enter"
+                    : "배틀 시작 후 채팅을 보낼 수 있습니다."
+                }
+              />
+              <button
+                type="button"
+                onClick={handleSendChat}
+                disabled={!isPlaying || !chatInput.trim()}
+                className="loop-chat-send-btn"
+              >
+                전송
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* 상대 입장 연출 */}
+      {stage === "intro" && (
+        <BattleIntroOverlay
           myNickname={myNickname}
-          onMockJoin={mockJoinEnemy} // 나중엔 제거하고 서버 이벤트로 대체
+          enemyNickname={enemyNickname}
+          onDone={() => setStage("playing")}
         />
       )}
 
-      {stage === "playing" && (
-        <PlayingView myNickname={myNickname} enemyNickname={enemyNickname} />
-      )}
-
-      {/* stage === "intro" 인 동안은 뒤에 기존 레이아웃 그대로 있고,
-          위의 fixed 오버레이만 잠깐 덮고 있다가 사라지는 구조 */}
-    </div>
-  );
-}
-
-// ====== 컴포넌트 쪼개기 ======
-
-interface WaitingViewProps {
-  myNickname: string;
-  onMockJoin: () => void;
-}
-
-function WaitingView({ myNickname, onMockJoin }: WaitingViewProps) {
-  return (
-    <main className="flex-1 flex flex-col items-center justify-center">
-      <div className="border border-dashed border-slate-700 rounded-2xl px-8 py-10 text-center max-w-lg w-full bg-slate-900/40">
-        <div className="text-sm text-slate-400 mb-3">
-          상대를 기다리는 중입니다...
-        </div>
-        <div className="flex items-center justify-center gap-4 mb-4">
-          <span className="px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-400 text-emerald-300 font-semibold">
-            {myNickname}
-          </span>
-          <span className="text-slate-500 font-bold">VS</span>
-          <span className="px-4 py-2 rounded-full bg-slate-800 border border-slate-600 text-slate-500">
-            waiting...
-          </span>
-        </div>
-        <p className="text-xs text-slate-500">
-          방 링크를 친구에게 보내거나, 랜덤 매칭을 통해 상대가 들어오면
-          배틀이 자동으로 시작됩니다.
-        </p>
-
-        {/* 개발용 버튼: 진짜 구현할 땐 삭제 */}
-        <button
-          onClick={onMockJoin}
-          className="mt-6 text-xs px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700"
-        >
-          🔧 개발용: 상대 입장 시뮬레이션
-        </button>
-      </div>
-    </main>
-  );
-}
-
-interface PlayingViewProps {
-  myNickname: string;
-  enemyNickname: string | null;
-}
-
-function PlayingView({ myNickname, enemyNickname }: PlayingViewProps) {
-  return (
-    <main className="flex-1 grid grid-cols-1 lg:grid-cols-[2fr,1.1fr] gap-4 mt-2">
-      {/* 문제 영역 */}
-      <section className="border border-slate-800 rounded-2xl p-4 bg-slate-900/60 flex flex-col">
-        <h3 className="font-semibold mb-2 text-sm text-slate-200">
-          문제
-        </h3>
-        <div className="flex-1 overflow-auto text-sm text-slate-300 space-y-2">
-          <p className="font-medium">
-            [예시] 운영체제: 프로세스 & 스레드 기본
-          </p>
-          <p>
-            프로세스와 스레드의 차이를 설명하고, 멀티스레딩의 장점과 단점을
-            간단히 서술하시오.
-          </p>
-          {/* 여기에 나중에 문제 타입(단답 / 코테)에 따라 다른 UI 렌더링 */}
-        </div>
-
-        <div className="mt-4">
-          <textarea
-            className="w-full h-32 bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm font-mono resize-none"
-            placeholder="여기에 답안을 작성하세요. (코드/단답/설명 등)"
-          />
-          <button className="mt-3 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-semibold text-sm">
-            제출하기
-          </button>
-        </div>
-      </section>
-
-      {/* 우측: 플레이어 정보 + 채팅 */}
-      <section className="border border-slate-800 rounded-2xl p-4 bg-slate-900/60 flex flex-col gap-3">
-        {/* 플레이어 카드 */}
-        <div className="flex items-center justify-between gap-2 text-sm">
-          <div className="flex-1">
-            <div className="text-xs text-slate-400 mb-1">You</div>
-            <div className="px-3 py-2 rounded-xl bg-slate-950 border border-emerald-500/60 text-emerald-300 font-semibold">
-              {myNickname}
-            </div>
-          </div>
-          <div className="flex-1 text-right">
-            <div className="text-xs text-slate-400 mb-1">Opponent</div>
-            <div className="px-3 py-2 rounded-xl bg-slate-950 border border-rose-500/60 text-rose-300 font-semibold">
-              {enemyNickname ?? "???"}
-            </div>
-          </div>
-        </div>
-
-        {/* 채팅 */}
-        <div className="flex-1 flex flex-col mt-1">
-          <h3 className="font-semibold mb-2 text-xs text-slate-300">
-            실시간 채팅
-          </h3>
-          <div className="flex-1 bg-slate-950 rounded-xl border border-slate-800 p-2 text-xs text-slate-300 overflow-auto">
-            {/* TODO: 메시지 리스트 */}
-            <p className="text-slate-500">아직 메시지가 없습니다.</p>
-          </div>
-          <div className="mt-2 flex gap-2">
-            <input
-              className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs"
-              placeholder="GLHF, GG 등 메시지 입력"
-            />
-            <button className="px-3 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-xs">
-              전송
+      {/* 무승부 모달 */}
+      {showTimeUpModal && (
+        <div className="loop-modal-backdrop">
+          <div className="loop-modal">
+            <h2 className="loop-modal-title">무승부!</h2>
+            <p className="loop-modal-text">
+              남은 시간이 <strong>00:00</strong>이 되어 배틀이
+              무승부로 종료되었습니다.
+            </p>
+            <button
+              type="button"
+              className="loop-primary-btn loop-modal-single-btn"
+              onClick={() => setShowTimeUpModal(false)}
+            >
+              확인
             </button>
           </div>
         </div>
-      </section>
-    </main>
+      )}
+
+      {/* 나가기 확인 모달 */}
+      {showExitModal && (
+        <div className="loop-modal-backdrop">
+          <div className="loop-modal">
+            <h2 className="loop-modal-title">배틀에서 나가시겠습니까?</h2>
+            <p className="loop-modal-text">
+              지금 나가면 <strong>패배</strong>로 기록됩니다. 정말
+              나가시겠어요?
+            </p>
+            <div className="loop-modal-actions">
+              <button
+                type="button"
+                className="loop-secondary-btn"
+                onClick={() => setShowExitModal(false)}
+              >
+                계속 싸우기
+              </button>
+              <button
+                type="button"
+                className="loop-danger-btn"
+                onClick={handleConfirmExit}
+              >
+                나가기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

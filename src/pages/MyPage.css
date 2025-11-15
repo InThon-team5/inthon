@@ -1,0 +1,537 @@
+
+.mypage-root {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 0% 0%, #141f48 0, transparent 45%),
+    radial-gradient(circle at 100% 0%, #35134d 0, transparent 45%),
+    #050814;
+  color: #f9fbff;
+}
+
+/* 상단 히어로 섹션 전체 */
+.rank-hero {
+  position: relative;
+  padding: 40px 0;
+}
+
+.rank-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    rgba(5, 8, 20, 0.95),
+    rgba(18, 37, 82, 0.8),
+    rgba(83, 26, 112, 0.75)
+  );
+  background-size: 200% 200%;
+  animation: heroGradientMove 16s ease-in-out infinite;
+  z-index: 0;
+}
+
+.rank-hero > .container-fluid {
+  position: relative;
+  z-index: 1;
+}
+
+.rank-left {
+  color: #f5f8ff;
+}
+
+.rank-label {
+  font-size: 1.2rem;
+  letter-spacing: 0.2em;
+  opacity: 0.8;
+}
+
+
+
+@keyframes heroGradientMove {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 70% 50%; }
+  100% { background-position: 20% 50%; }
+}
+
+/* 랭크 글자에 펄스 효과 */
+.rank-up-text {
+  font-size: 5rem;
+  font-weight: 700;
+  color: linear-gradient(90deg, #ffd86b, #ff65f2);
+  text-shadow:
+    0 0 12px rgba(255, 101, 242, 0.8),
+    0 0 36px rgba(255, 101, 242, 0.4);
+  animation: rankGlow 3.3s ease-in-out infinite;
+  padding-left: 70px;
+}
+
+@keyframes rankGlow {
+  0%   { text-shadow: 0 0 8px rgba(255, 101, 242, 0.5), 0 0 12px rgba(255, 101, 242, 0.3); }
+  50%  { text-shadow: 0 0 9px rgba(255, 180, 252, 0.7), 0 0 24px rgba(255, 101, 242, 0.4); }
+  100% { text-shadow: 0 0 8px rgba(255, 101, 242, 0.5), 0 0 12px rgba(255, 101, 242, 0.3); }
+}
+
+.rank-main-letter {
+  font-size: 5rem;
+  font-weight: 900;
+  color: #ebf73a;
+  text-shadow: 0 0 18px rgba(255, 255, 255, 0.9);
+}
+
+.rank-sub-info .rank-tier-name {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.rank-sub-info .rank-rating {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.rank-sub-info .rank-percent {
+  font-size: 0.9rem;
+  color: #7de0ff;
+}
+
+.rank-progress-wrap .rank-progress {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.rank-progress-wrap .rank-progress .progress-bar {
+  background: linear-gradient(90deg, #ffd86b, #ff65f2);
+}
+
+/* 프로필 카드 + 오른쪽 영역 */
+.profile-main-info {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.profile-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 400px;
+}
+
+.profile-title {
+  font-size: 0.9rem;
+  color: #a9b4ff;
+}
+
+.profile-summary {
+  font-size: 0.85rem;
+  color: #d2d7ff;
+}
+
+/* 메인 카드 영역 */
+.mypage-main {
+  background: #0b1020;
+  color: #e9ecff;
+}
+
+.mypage-main .card {
+  background: rgba(8, 12, 32, 0.9);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e9ecff;
+}
+
+.mypage-main .card-header {
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.815);
+  color: #f7f7ff;
+}
+
+.mypage-main .card-body {
+  background: transparent;
+  color: #e4e8ff;
+}
+
+.mypage-main .card p {
+  color: #ffffff !important;
+}
+
+/* 네온 기술 카드 */
+.tech-card-list {
+  min-height: 70px;
+}
+
+
+/* 모달 공통 */
+.tech-editor-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.tech-editor-modal {
+  width: min(600px, 90vw);
+  max-height: 80vh;
+  background: #06091b;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 16px 18px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+  color: #f2f4ff;
+  display: flex;
+  flex-direction: column;
+}
+
+.tech-editor-body {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+.btn-close {
+  display: none;
+}
+
+.tech-editor-body .d-flex {
+  margin-top: 10px;
+}
+
+
+.profile-main-info {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* 카드에 살짝 떠오르는 효과 */
+.profile-card {
+  background: radial-gradient(circle at 10% 0%, #141b3d 0, #06091b 40%, #06091b 100%);
+  border-radius: 16px;
+  padding: 40px 60px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+  transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out;
+}
+
+.profile-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 52px rgba(0, 0, 0, 0.85);
+  border-color: rgba(135, 194, 243, 0.7);
+}
+
+.rank-progress-wrap {
+  background: radial-gradient(circle at 10% 0%, #141b3d 0, #06091b 40%, #06091b 100%);
+  border-radius: 16px;
+  padding: 40px 60px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+  transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out;
+}
+
+.rank-progress-wrap:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 52px rgba(0, 0, 0, 0.85);
+  border-color: rgba(135, 194, 243, 0.7);
+}
+
+/* 큰 프로필 이미지에 부드러운 호버 */
+.rank-hero-image {
+  width: 350px;
+  height: 350px;
+  background-image: url("/images/basicprofile.jpg");
+  background-size: cover;
+  background-position: center;
+  border-radius: 12px;
+  flex-shrink: 0;
+  box-shadow:
+    0 0 25px rgba(99, 170, 255, 0.45),
+    0 0 60px rgba(122, 97, 255, 0.25);
+  transition: transform 0.25s ease-out, box-shadow 0.25s ease-out, filter 0.25s ease-out;
+}
+
+.rank-hero-image:hover {
+  transform: translateY(-3px) scale(1.02);
+  filter: brightness(1.06);
+  box-shadow:
+    0 0 32px rgba(124, 197, 255, 0.75),
+    0 0 80px rgba(255, 102, 196, 0.55);
+}
+
+
+/* 네온 카드 */
+.neon-tech-card {
+  min-width: 140px;
+  padding: 10px 16px;
+  border-radius: 16px;
+  background: radial-gradient(circle at 0% 0%, #ffeb70, #ff7bff);
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 0 12px rgba(255, 123, 255, 0.9),
+    0 0 24px rgba(255, 235, 112, 0.6);
+  transform: translateY(0);
+  transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, filter 0.18s ease-out;
+  color: #050814;
+}
+
+.neon-tech-card:hover {
+  transform: translateY(-3px) scale(1.02);
+  filter: brightness(1.05);
+  box-shadow:
+    0 0 18px rgba(255, 123, 255, 1),
+    0 0 36px rgba(255, 235, 112, 0.9);
+}
+
+/* 안쪽 영역 */
+.neon-tech-card::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
+}
+
+/* 옵션 버튼 (모달 안) */
+.tech-option-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.02);
+  color: #e4e8ff;
+  padding-inline: 14px;
+  padding-block: 6px;
+  transition: all 0.15s ease-out;
+}
+
+.tech-option-btn:hover {
+  border-color: #ff7bff;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 10px rgba(255, 123, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+.tech-option-btn-active {
+  background: linear-gradient(135deg, #ffeb70, #ff7bff);
+  color: #151320;
+  border-color: transparent;
+  box-shadow:
+    0 0 12px rgba(255, 123, 255, 0.9),
+    0 0 24px rgba(255, 235, 112, 0.6);
+}
+
+
+/* ============================= */
+/*        LIGHT THEME            */
+/* ============================= */
+
+/* 라이트 모드 기본 배경/글자색만 변경 */
+.mypage-root.theme-light {
+  background: #f5f7ff;
+  color: #111827;
+}
+
+/* 히어로 오버레이 색만 밝게 */
+.mypage-root.theme-light .rank-hero-overlay {
+  background: linear-gradient(
+    120deg,
+    rgba(240, 243, 255, 0.96),
+    rgba(228, 235, 255, 0.92),
+    rgba(255, 255, 255, 0.98)
+  );
+}
+
+/* 텍스트 컬러만 변경 */
+.mypage-root.theme-light .rank-left {
+  color: #111827;
+}
+
+.mypage-root.theme-light .rank-label {
+  color: #6b7280;
+}
+
+/* 랭크 텍스트: 크기는 그대로, 색/효과만 변경 */
+.mypage-root.theme-light .rank-up-text {
+  color: #1d4ed8;
+  text-shadow: none;
+  animation: none;
+}
+
+.mypage-root.theme-light .rank-main-letter {
+  color: #1d4ed8;
+  text-shadow: none;
+}
+
+.mypage-root.theme-light .rank-sub-info .rank-tier-name {
+  color: #111827;
+}
+
+.mypage-root.theme-light .rank-sub-info .rank-rating {
+  color: #374151;
+}
+
+.mypage-root.theme-light .rank-sub-info .rank-percent {
+  color: #2563eb;
+}
+
+/* 진행도 카드: 배경/테두리/그림자만 변경 (padding/크기 그대로) */
+.mypage-root.theme-light .rank-progress-wrap {
+  background: #ffffff;
+  border-color: #e5e7eb;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.mypage-root.theme-light .rank-progress-wrap .rank-progress {
+  background: #e5e7eb;
+}
+
+.mypage-root.theme-light .rank-progress-wrap .rank-progress .progress-bar {
+  background: linear-gradient(90deg, #2563eb, #4f46e5);
+}
+
+/* 프로필 카드: 배경/테두리/그림자만 변경 (padding/크기 그대로) */
+.mypage-root.theme-light .profile-card {
+  background: #ffffff;
+  border-color: #e5e7eb;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+}
+
+.mypage-root.theme-light .profile-name {
+  color: #111827;
+}
+
+.mypage-root.theme-light .profile-title {
+  color: #6b7280;
+}
+
+.mypage-root.theme-light .profile-summary {
+  color: #4b5563;
+}
+
+/* 큰 프로필 이미지: 크기는 그대로, 그림자/필터만 변경 */
+.mypage-root.theme-light .rank-hero-image {
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+  filter: none;
+}
+
+.mypage-root.theme-light .rank-hero-image:hover {
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.25);
+}
+
+/* 메인 영역 배경/카드 색만 변경 */
+.mypage-root.theme-light .mypage-main {
+  background: #eef2ff;
+  color: #111827;
+}
+
+.mypage-root.theme-light .mypage-main .card {
+  background: #ffffff;
+  border-color: #e5e7eb;
+  color: #111827;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+
+.mypage-root.theme-light .mypage-main .card-header {
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  color: #111827;
+}
+
+.mypage-root.theme-light .mypage-main .card-body {
+  background: transparent;
+  color: #111827;
+}
+
+.mypage-root.theme-light .mypage-main .card p {
+  color: #4b5563 !important;
+}
+
+/* 최근 전적 테이블 색상 */
+.mypage-root.theme-light .table {
+  color: #111827;
+}
+
+.mypage-root.theme-light .table thead.table-dark {
+  background-color: #1d4ed8;
+  color: #ffffff;
+}
+
+.mypage-root.theme-light .table-hover tbody tr:hover {
+  background-color: #eff6ff;
+}
+
+/* 네온 기술 카드: 크기는 그대로, 색만 조금 라이트하게 */
+.mypage-root.theme-light .neon-tech-card {
+  background: linear-gradient(135deg, #e0ecff, #f9fafb);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.1);
+  color: #111827;
+}
+
+.mypage-root.theme-light .neon-tech-card:hover {
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
+}
+
+/* 모달: 색만 변경 */
+.mypage-root.theme-light .tech-editor-modal {
+  background: #ffffff;
+  color: #111827;
+  border-color: #e5e7eb;
+}
+
+/* 버튼 컬러만 변경 (크기 동일) */
+.mypage-root.theme-light .btn-primary {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+.mypage-root.theme-light .btn-primary:hover {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.mypage-root.theme-light .btn-outline-light {
+  color: #2563eb;
+  border-color: #d1d5db;
+  background-color: #ffffff;
+}
+
+.mypage-root.theme-light .btn-outline-light:hover {
+  color: #1d4ed8;
+  border-color: #1d4ed8;
+  background-color: #eff6ff;
+}
+
+/* 테마 토글 버튼 */
+.theme-toggle-btn {
+  position: absolute;
+  right: 40px;
+  top: 24px;
+  z-index: 2;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(15, 23, 42, 0.6);
+  color: #f9fafb;
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.16s ease-out;
+}
+
+.theme-toggle-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.35);
+}
+
+/* 라이트 모드일 때 토글 버튼 색만 반대로 */
+.mypage-root.theme-light .theme-toggle-btn {
+  background: rgba(255, 255, 255, 0.95);
+  color: #111827;
+  border-color: #e5e7eb;
+}
