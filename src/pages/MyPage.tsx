@@ -1,6 +1,10 @@
+// src/pages/MyPage.tsx
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Mypage.css";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useTheme } from "../ThemeProvider";
+
 import {
   fetchProfile,
   fetchTechStacks,
@@ -8,14 +12,13 @@ import {
   fetchClubs,
   updateProfile,
   type TechStackRef,
-  type TitleRef,
-  type ClubRef,
   type Profile,
+  type ClubRef,
+  type TitleRef,
 } from "./services/profileApi";
 
 export default function MyPage() {
   const { theme, toggleTheme } = useTheme();
-
   const navigate = useNavigate();
 
   // 데모용 최근 전적 (나중에 API 붙이면 교체)
@@ -74,8 +77,15 @@ export default function MyPage() {
     );
   };
 
-  const toggleTheme = () =>
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  const toggleClub = (id: number) => {
+    setSelectedClubIds((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectTitle = (id: number | null) => {
+    setSelectedTitleId(id);
+  };
 
   const getResultBadgeClass = (result: string) => {
     const upper = result.toUpperCase();
@@ -102,14 +112,17 @@ export default function MyPage() {
   if (nextRank) {
     const rangeSize = nextRank.min - currentRank.min;
     const filled = currentRating - currentRank.min;
-    progressPercent = Math.min(100, Math.max(0, (filled / rangeSize) * 100));
+    progressPercent = Math.min(
+      100,
+      Math.max(0, (filled / rangeSize) * 100)
+    );
 
     const remain = Math.max(nextRank.min - currentRating, 0);
     nextTierLabel = nextRank.title;
     nextTierRemainLabel = `-${remain} pts`;
   }
 
-  // 칭호 선택 옵션 (나중에 소속별 제한 생기면 여기서 필터링)
+  // 칭호 선택 옵션
   const selectableTitles =
     profile && profile.titles && profile.titles.length > 0
       ? profile.titles
@@ -167,7 +180,7 @@ export default function MyPage() {
     load();
   }, []);
 
-  // ===== 기술 스택 저장 (PATCH /api/profile/) =====
+  // ===== 기술 스택 저장 =====
   const handleSaveTechStacks = async () => {
     const access = localStorage.getItem("loop_access");
     if (!access) {
@@ -200,13 +213,18 @@ export default function MyPage() {
     }
   };
 
+  // ===== 소속(동아리) 저장 =====
+  const handleSaveClubs = async () => {
+    const access = localStorage.getItem("loop_access");
+    if (!access) {
+      setError("로그인 정보가 없습니다. 다시 로그인 해주세요.");
+      setIsClubEditorOpen(false);
+      return;
+    }
 
     try {
-      // 1) 서버에는 id 배열만 보냄
       await updateProfile(access, { club_ids: selectedClubIds });
 
-      // 2) 응답에 clubs가 있든 없든,
-      //    프론트에서 현재 선택 상태로 profile.clubs를 직접 맞춰준다.
       setProfile((prev) =>
         prev
           ? {
@@ -227,7 +245,6 @@ export default function MyPage() {
       setIsClubEditorOpen(false);
     }
   };
-
 
   // ===== 칭호 저장 (활성 칭호) =====
   const handleSaveActiveTitle = async () => {
@@ -256,10 +273,10 @@ export default function MyPage() {
 
   return (
     <div
-    className={`mypage-root ${
-      theme === "dark" ? "theme-dark" : "theme-light"
-    }`}
-  >
+      className={`mypage-root ${
+        theme === "dark" ? "theme-dark" : "theme-light"
+      }`}
+    >
       {/* 전역 에러 표시 */}
       {error && (
         <div className="alert alert-danger text-center m-0 rounded-0">
@@ -328,13 +345,15 @@ export default function MyPage() {
                       )}
                     </div>
                     <div className="profile-title mb-2">
-                      {profile?.activate_title? profile.activate_title.name : "칭호 없음"}
+                      {profile?.activate_title
+                        ? profile.activate_title.name
+                        : "칭호 없음"}
                     </div>
 
                     <div className="d-flex flex-wrap gap-2 mb-3">
                       <button
                         className="btn btn-sm btn-outline-light"
-                        onClick={() => { setIsTitleEditorOpen(true)}}
+                        onClick={() => setIsTitleEditorOpen(true)}
                       >
                         칭호 수정
                       </button>
@@ -574,7 +593,7 @@ export default function MyPage() {
                 type="button"
                 className="btn-close btn-close-white"
                 aria-label="Close"
-                onClick={() => { setIsTitleEditorOpen(false);}}
+                onClick={() => setIsTitleEditorOpen(false)}
               />
             </div>
 
@@ -626,7 +645,10 @@ export default function MyPage() {
             <div className="tech-editor-footer d-flex justify-content-end gap-2">
               <button
                 className="btn btn-sm btn-primary"
-                onClick={async () => { await handleSaveActiveTitle(); window.location.reload();}}
+                onClick={async () => {
+                  await handleSaveActiveTitle();
+                  window.location.reload();
+                }}
               >
                 저장
               </button>
