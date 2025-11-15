@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from users.models import User
 from problems.models import Problem
-from .models import BattleStatus, BattleRoom
+from .models import BattleStatus, BattleRoom, BattleResult
 
 
 class BattleStatusSerializer(serializers.ModelSerializer):
@@ -118,5 +118,30 @@ class PasswordVerifySerializer(serializers.Serializer):
             raise serializers.ValidationError("비밀번호는 4자리여야 합니다.")
         return value
 
+
+class BattleResultSubmitSerializer(serializers.Serializer):
+    """대결 결과 제출용 Serializer"""
+    remaining_time_percent = serializers.IntegerField(
+        min_value=0,
+        max_value=100,
+        help_text="남은 시간 퍼센트 (0-100)"
+    )
+    accuracy_percent = serializers.IntegerField(
+        min_value=0,
+        max_value=100,
+        help_text="정답률 퍼센트 (0-100)"
+    )
+
+
+class BattleResultSerializer(serializers.ModelSerializer):
+    """대결 결과 조회용 Serializer"""
+    user = UserSimpleSerializer(read_only=True)
+    
+    class Meta:
+        model = BattleResult
+        fields = (
+            'id', 'user', 'remaining_time_percent', 'accuracy_percent',
+            'total_score', 'result', 'submitted_at'
+        )
 
 

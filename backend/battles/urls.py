@@ -6,6 +6,8 @@ from .views import (
     verify_password,
     join_room,
     BattleRoomStatusUpdateView,
+    submit_battle_result,
+    get_battle_result,
 )
 
 urlpatterns = [
@@ -26,5 +28,9 @@ urlpatterns = [
     path('rooms/<int:room_id>/join/', join_room, name='join-room'),
     # PATCH /api/battles/rooms/{id}/status/ - 대결방 상태 변경
     path('rooms/<int:id>/status/', BattleRoomStatusUpdateView.as_view(), name='battle-room-status-update'),
+    # POST /api/battles/rooms/{room_id}/submit-result/ - 대결 결과 제출
+    path('rooms/<int:room_id>/submit-result/', submit_battle_result, name='submit-battle-result'),
+    # GET /api/battles/rooms/{room_id}/result/ - 대결 결과 조회
+    path('rooms/<int:room_id>/result/', get_battle_result, name='get-battle-result'),
 ]
 

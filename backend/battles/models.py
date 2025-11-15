@@ -25,6 +25,14 @@ class BattleRoom(models.Model):
         related_name='hosted_battles',
         db_column='host_id'
     )
+    guest = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='guest_battles',
+        db_column='guest_id',
+        null=True,
+        blank=True
+    )
     status = models.ForeignKey(
         BattleStatus,
         on_delete=models.CASCADE,
@@ -46,5 +54,49 @@ class BattleRoom(models.Model):
     
     def __str__(self):
         return f"{self.title} (호스트: {self.host})"
+
+
+class BattleResult(models.Model):
+    """대결 결과 모델"""
+    room = models.ForeignKey(
+        BattleRoom,
+        on_delete=models.CASCADE,
+        related_name='results',
+        db_column='room_id'
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='battle_results',
+        db_column='user_id'
+    )
+    remaining_time_percent = models.IntegerField(
+        help_text="남은 시간 퍼센트 (0-100)"
+    )
+    accuracy_percent = models.IntegerField(
+        help_text="정답률 퍼센트 (0-100)"
+    )
+    total_score = models.IntegerField(
+        help_text="합산 점수 (remaining_time_percent + accuracy_percent)"
+    )
+    result = models.CharField(
+        max_length=10,
+        choices=[
+            ('win', '승리'),
+            ('lose', '패배'),
+            ('draw', '무승부')
+        ],
+        null=True,
+        blank=True,
+        help_text="승패 결과"
+    )
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = '대결결과'
+        unique_together = [['room', 'user']]  # 한 방에서 한 사용자는 하나의 결과만
+    
+    def __str__(self):
+        return f"{self.room} - {self.user}: {self.result}"
 
 
