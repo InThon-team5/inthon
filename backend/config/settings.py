@@ -12,16 +12,29 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import os
+import json
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# secrets.json에서 SECRET_KEY 로드
+SECRETS_FILE = BASE_DIR / 'secrets.json'
+try:
+    with open(SECRETS_FILE, 'r', encoding='utf-8') as f:
+        secrets = json.load(f)
+        SECRET_KEY = secrets.get('SECRET_KEY')
+        if not SECRET_KEY:
+            raise ValueError("SECRET_KEY가 secrets.json에 없습니다.")
+except FileNotFoundError:
+    raise FileNotFoundError(f"secrets.json 파일을 찾을 수 없습니다: {SECRETS_FILE}")
+except json.JSONDecodeError:
+    raise ValueError(f"secrets.json 파일의 JSON 형식이 올바르지 않습니다: {SECRETS_FILE}")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-nmavd#1f2$uc5q(1o!&3^#7qn#qxxo@qt20s#7o0h9i@alnk(t'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
