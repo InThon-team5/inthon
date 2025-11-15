@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import User
+from .models import User, Profile
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class UserCreateSerializer(serializers.ModelSerializer):
     
@@ -41,3 +42,21 @@ class UserCreateSerializer(serializers.ModelSerializer):
         # Profile.objects.create(user=user)
         
         return user
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        # 1. 기본 토큰 생성 (access, refresh)
+        token = super().get_token(user)
+
+        # 2. (선택) 토큰 Payload에 추가할 커스텀 정보
+        #    - user 객체에서 원하는 정보를 가져와 'claims'로 추가
+        token['email'] = user.email
+        
+        # (주의!) user.profile.nickname은 Profile이 있어야만 접근 가능
+        try:
+            token['nickname'] = user.profile.nickname
+        except Profile.DoesNotExist:
+            token['nickname'] = None # 프로필이 아직 없으면 null
+        
+        return token
