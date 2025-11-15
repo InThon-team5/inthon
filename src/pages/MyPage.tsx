@@ -2,9 +2,10 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Mypage.css";
 import { useState } from "react";
+import { useTheme } from "../ThemeProvider";
 
 export default function MyPage() {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const { theme, toggleTheme } = useTheme(); 
   const recentRecords = [
     { id: 1, title: "코딩 배틀 vs 홍길동", date: "2025-11-10", result: "WIN" },
     { id: 2, title: "나 vs 너", date: "2025-11-09", result: "LOSE" },
@@ -63,8 +64,6 @@ export default function MyPage() {
     );
   };
 
-  const toggleTheme = () =>
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
 
   const getResultBadgeClass = (result: string) => {
     const upper = result.toUpperCase();

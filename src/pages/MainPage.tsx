@@ -4,12 +4,13 @@ import { useNavigate } from "react-router-dom";
 import "./BattlePage.css";  // Loop 공통 테마
 import "./MainPage.css";    // 메인 페이지 전용 스타일
 import { loginApi, signupApi } from "../services/authAPI";
+import { useTheme } from "../ThemeProvider";
 
 const KOREA_EMAIL_REGEX = /^[^\s@]+@korea\.ac\.kr$/;
 
 export default function MainPage() {
   const navigate = useNavigate();
-
+  const { theme, toggleTheme } = useTheme();
   // 다크 모드
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -177,28 +178,13 @@ export default function MainPage() {
   };
 
   return (
-    <div className={`loop-root ${isDarkMode ? "dark-mode" : ""}`}>
-      {/* 상단 글로벌 바 */}
-      <div className="loop-topbar">
-        <div className="loop-brand">
-          <div className="loop-logo">🔥</div>
-          <span className="loop-brand-name">Loop</span>
-        </div>
-
-        <div className="loop-topbar-right">
-          <button
-            type="button"
-            className="loop-theme-toggle"
-            onClick={() => setIsDarkMode((prev) => !prev)}
-          >
-            <span className="loop-theme-dot" />
-            <span className="loop-theme-label">
-              {isDarkMode ? "Dark Mode" : "Light Mode"}
-            </span>
-          </button>
-          <span className="loop-version">v0.1</span>
-        </div>
-      </div>
+    <div className={`loop-root ${theme === "dark" ? "dark-mode" : ""}`}>
+      {/* 상단에 다크모드 토글 버튼이 있다면 예시 */}
+      <header className="title-header">
+        <button className="theme-toggle-btn" onClick={toggleTheme}>
+          {theme === "dark" ? "☀ Light Mode" : "🌙 Dark Mode"}
+        </button>
+      </header>
 
       {/* 메인 타이틀 영역 */}
       <main className="title-main">
