@@ -27,7 +27,8 @@ dist-ssr
 backend/venv/
 
 # 파이썬 캐시
-backend/__pycache__/
+__pycache__/
+*.pyc
 
 # Django 기본 데이터베이스
 backend/db.sqlite3
