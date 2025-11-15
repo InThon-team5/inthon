@@ -52,11 +52,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users',
+    "corsheaders",
     'rest_framework',
     'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -164,3 +166,7 @@ SIMPLE_JWT = {
 DEBUG = False
 
 ALLOWED_HOSTS = ['*', '.pythonanywhere.com']
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",   # Vite dev 서버
+]

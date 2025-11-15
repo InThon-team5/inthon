@@ -3,7 +3,7 @@ import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import "./BattlePage.css";  // Loop 공통 테마
 import "./MainPage.css";    // 메인 페이지 전용 스타일
-import { loginApi, signupApi } from "../services/authAPI";
+import { loginApi, signupApi } from "./services/authApi";
 
 const KOREA_EMAIL_REGEX = /^[^\s@]+@korea\.ac\.kr$/;
 
