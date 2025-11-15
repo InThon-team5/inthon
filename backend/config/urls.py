@@ -26,6 +26,8 @@ urlpatterns = [
     path('api/', include('users.urls')),
     # /api/types/, /api/subjects/, /api/problems/ (문제 관련)
     path('api/', include('problems.urls')),
+    # /api/battles/ (대결 관련)
+    path('api/battles/', include('battles.urls')),
     # POST /api/token/refresh/ (Access Token 재발급)
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
