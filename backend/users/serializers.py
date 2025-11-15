@@ -38,8 +38,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
             email=validated_data['email'],
             password=validated_data['password']
         )
-        # Profile도 여기서 함께 생성할 수 있습니다. (선택 사항)
-        # Profile.objects.create(user=user)
+        Profile.objects.create(user=user)
         
         return user
 
