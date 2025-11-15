@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { BattleIntroOverlay } from "../components/BattleIntroOverlay";
 import "./BattlePage.css";
+import { useTheme } from "../ThemeProvider";
 
 const BATTLE_DURATION = 180; // 3분
 const TOTAL_QUESTIONS = 5;
@@ -47,7 +48,7 @@ export default function BattlePage() {
   );
 
   // 라이트/다크 모드
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   // 모달
   const [showTimeUpModal, setShowTimeUpModal] = useState(false);
@@ -163,7 +164,7 @@ export default function BattlePage() {
     (opponentSolved / TOTAL_QUESTIONS) * 100;
 
   return (
-    <div className={`loop-root ${isDarkMode ? "dark-mode" : ""}`}>
+    <div className={`loop-root ${theme === "dark" ? "dark-mode" : ""}`}>
       {/* 상단 글로벌 바 */}
       <div className="loop-topbar">
         <div className="loop-brand">
@@ -175,11 +176,11 @@ export default function BattlePage() {
           <button
             type="button"
             className="loop-theme-toggle"
-            onClick={() => setIsDarkMode((prev) => !prev)}
+            onClick={toggleTheme}   // ★ 전역 theme 사용
           >
             <span className="loop-theme-dot" />
             <span className="loop-theme-label">
-              {isDarkMode ? "Dark Mode" : "Light Mode"}
+              {theme === "dark" ? "Dark Mode" : "Light Mode"}
             </span>
           </button>
           <span className="loop-version">v0.1</span>

@@ -23,15 +23,16 @@
 }
 
 .title-right {
-  width: 380px;
+  width: 500px;
   max-width: 100%;
   flex-shrink: 0;
+  padding-right: 50px;
 }
 
 /* 소개 텍스트 */
 
 .title-kicker {
-  font-size: 0.85rem;
+  font-size: 1rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--loop-text-soft);
@@ -53,7 +54,7 @@
 }
 
 .title-description {
-  font-size: 0.95rem;
+  font-size: 1rem;
   line-height: 1.7;
   color: var(--loop-text-sub);
 }
