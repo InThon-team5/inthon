@@ -35,3 +35,4 @@ backend/db.sqlite3
 
 # .env 파일 (API 키 등)
 backend/.env
+backend/secrets.json
