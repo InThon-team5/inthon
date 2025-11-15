@@ -382,8 +382,6 @@ export default function MyPage() {
 
                     <div className="profile-summary">
                       오늘도 코딩 배틀 중... <br />
-                      최근 10판 승률 73% <br />
-                      평균 해결 시간 12분. <br />
                       {profile?.clubs && profile.clubs.length > 0 ? (
                         <span className="small text-muted">
                           소속:{" "}

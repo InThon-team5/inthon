@@ -1,380 +1,575 @@
-import React, { useState } from 'react';
-import { useNavigate } from "react-router-dom";
+// src/pages/LobbyPage.tsx
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './LobbyPage.css';
-import { useTheme } from "../ThemeProvider";
+import { useTheme } from '../ThemeProvider';
+import {
+  fetchBattleRooms,
+  createBattleRoom,
+  verifyRoomPassword,
+  joinBattleRoom,
+  type Room,
+  type Grade,
+  type BattleType,
+} from './services/battleRoomApi';
+import { fetchProfile } from './services/profileApi';
 
-// --- 타입 및 데이터 정의 (이전과 동일) ---
-type BattleType = '코테' | '미니';
+// === 필터 타입 ===
 type FilterType = '전체' | BattleType;
-type RoomStatus = '대기 중' | '진행 중';
-type Grade = '전체' | 'A+' | 'A0' | 'B+' | 'B0' | 'C+' | 'C0' | 'D+' | 'D0' | 'F';
+type GradeFilter = '전체' | Grade;
 
-const GRADES: Grade[] = ['전체', 'A+', 'A0', 'B+', 'B0', 'C+', 'C0', 'D+', 'D0', 'F'];
-
-interface Room {
-    id: number;
-    type: BattleType;
-    title: string;
-    tier: Grade;
-    currentPlayers: number;
-    maxPlayers: number;
-    status: RoomStatus;
-    isPrivate: boolean;
-}
-
-const DUMMY_ROOMS_INITIAL: Room[] = [
-    { id: 1, type: '미니', title: 'OS 기본 지식 스피드 퀴즈 (제한 없음)', tier: 'B0', currentPlayers: 1, maxPlayers: 2, status: '대기 중', isPrivate: false },
-    { id: 2, type: '코테', title: '자료구조 A+ 받기 배틀', tier: 'A+', currentPlayers: 1, maxPlayers: 2, status: '대기 중', isPrivate: false },
-    { id: 3, type: '코테', title: '1황 가리기 돌아와 (진행 중)', tier: 'A0', currentPlayers: 2, maxPlayers: 2, status: '진행 중', isPrivate: true },
-    { id: 4, type: '코테', title: '정보대 최고수들의 대결', tier: 'B+', currentPlayers: 1, maxPlayers: 2, status: '대기 중', isPrivate: true },
-    { id: 5, type: '미니', title: '최신 웹 트렌드 미니 퀴즈', tier: 'C0', currentPlayers: 0, maxPlayers: 2, status: '대기 중', isPrivate: false },
+// 필터 버튼용
+const GRADE_FILTERS: GradeFilter[] = [
+  '전체',
+  'A+',
+  'A0',
+  'B+',
+  'B0',
+  'C+',
+  'C0',
+  'D+',
+  'D0',
+  'F',
 ];
 
-// --- PasswordModal 컴포넌트 (이전과 동일) ---
+// --- PasswordModal 컴포넌트 ---
 interface PasswordModalProps {
-    roomTitle: string;
-    onClose: () => void;
-    onConfirm: (password: string) => void;
+  roomTitle: string;
+  onClose: () => void;
+  onConfirm: (password: string) => void | Promise<void>;
 }
 
-const PasswordModal: React.FC<PasswordModalProps> = ({ roomTitle, onClose, onConfirm }) => {
-    const [password, setPassword] = useState('');
+const PasswordModal: React.FC<PasswordModalProps> = ({
+  roomTitle,
+  onClose,
+  onConfirm,
+}) => {
+  const [password, setPassword] = useState('');
 
-    const handleSubmit = () => {
-        if (password.trim()) {
-            onConfirm(password);
-        } else {
-            alert("비밀번호를 입력해 주세요.");
-        }
-    };
+  const handleSubmit = () => {
+    if (password.trim()) {
+      onConfirm(password);
+    } else {
+      alert('비밀번호를 입력해 주세요.');
+    }
+  };
 
-    return (
-        <div className="modal-overlay">
-            <div className="password-modal">
-                <h2>🔒 비공개 방 입장</h2>
-                <p className="room-title-display">방 제목: **{roomTitle}**</p>
+  return (
+    <div className="modal-overlay">
+      <div className="password-modal">
+        <h2>🔒 비공개 방 입장</h2>
+        <p className="room-title-display">방 제목: {roomTitle}</p>
 
-                <label className="input-label">비밀번호 입력</label>
-                <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="비밀번호를 입력하세요"
-                    className="input-field"
-                    autoFocus
-                    onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                            handleSubmit();
-                        }
-                    }}
-                />
+        <label className="input-label">비밀번호 입력</label>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="비밀번호를 입력하세요"
+          className="input-field"
+          autoFocus
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleSubmit();
+            }
+          }}
+        />
 
-                <div className="modal-actions">
-                    <button className="create-btn" onClick={handleSubmit}>
-                        입장
-                    </button>
-                    <button className="cancel-btn" onClick={onClose}>
-                        취소
-                    </button>
-                </div>
-            </div>
+        <div className="modal-actions">
+          <button className="create-btn" onClick={handleSubmit}>
+            입장
+          </button>
+          <button className="cancel-btn" onClick={onClose}>
+            취소
+          </button>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
+// --- CreateRoomModal 컴포넌트 ---
+interface CreateRoomForm {
+  title: string;
+  roomType: BattleType;
+  isPrivate: boolean;
+  privatePassword?: string;
+  problems: number[];
+}
 
-// --- RoomItem 컴포넌트 (이전과 동일) ---
-const RoomItem: React.FC<{ room: Room; onEnter: (room: Room) => void }> = ({ room, onEnter }) => {
-    const isCote = room.type === '코테';
-    const isFull = room.currentPlayers === room.maxPlayers;
-    const isPlaying = room.status === '진행 중';
-    const canEnter = !isFull && !isPlaying;
-
-    return (
-        <div className={`room-item ${isPlaying ? 'playing' : ''}`}>
-            <div className={`room-type-tag ${isCote ? 'cote' : 'mini'}`}>
-                {room.type}
-            </div>
-
-            <div className="room-details">
-                <div className="room-title">
-                    {room.title}
-                </div>
-                <div className={`room-tier-info ${room.tier.toLowerCase().replace('+', '\\+')}`}>
-                    {room.tier}
-                </div>
-            </div>
-
-            <div className="room-status-actions">
-                {room.isPrivate && <span className="room-lock">🔒 잠김</span>}
-                <span className="room-privacy">
-                    {room.isPrivate ? '비공개' : '공개'} ({room.status})
-                </span>
-
-                <span className={`room-players ${isFull ? 'full' : ''}`}>
-                    ({room.currentPlayers}/{room.maxPlayers})
-                </span>
-
-                <button
-                    className={`action-btn ${canEnter ? 'enter' : isPlaying ? 'in-progress' : 'disabled'}`}
-                    disabled={!canEnter}
-                    onClick={() => canEnter && onEnter(room)}
-                >
-                    {isPlaying ? '진행 중' : canEnter ? '입장' : '대기 중'}
-                </button>
-            </div>
-        </div>
-    );
-};
-
-
-// --- CreateRoomModal 컴포넌트 (이전과 동일) ---
 interface CreateRoomModalProps {
-    onClose: () => void;
+  onClose: () => void;
+  onCreate: (form: CreateRoomForm) => void | Promise<void>;
 }
 
-const CreateRoomModal: React.FC<CreateRoomModalProps> = ({ onClose }) => {
-    const [roomType, setRoomType] = useState<BattleType>('코테');
-    const [isPrivate, setIsPrivate] = useState(false);
+const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
+  onClose,
+  onCreate,
+}) => {
+  const [roomType, setRoomType] = useState<BattleType>('코테');
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [title, setTitle] = useState('');
+  const [password, setPassword] = useState('');
+  const [problemsInput, setProblemsInput] = useState(''); // "1,2,3" 형식
 
-    return (
-        <div className="modal-overlay">
-            <div className="create-room-modal">
-                <h2>새로운 대결 방 만들기 (1:1 전용)</h2>
+  const handleCreateClick = () => {
+    if (!title.trim()) {
+      alert('방 제목을 입력해 주세요.');
+      return;
+    }
 
-                <div className="modal-content-area">
-                    <label className="input-label">방 제목</label>
-                    <input type="text" placeholder="예: 자료구조 A+ 평가 완벽" className="input-field" />
+    if (isPrivate && !password.trim()) {
+      alert('비공개 방 비밀번호를 입력해 주세요.');
+      return;
+    }
 
-                    <label className="input-label">대결 종류</label>
-                    <div className="type-selector">
-                        <button
-                            className={`type-btn ${roomType === '코테' ? 'active' : ''}`}
-                            onClick={() => setRoomType('코테')}
-                        >
-                            💻 코딩 테스트
-                        </button>
-                        <button
-                            className={`type-btn ${roomType === '미니' ? 'active' : ''}`}
-                            onClick={() => setRoomType('미니')}
-                        >
-                            🎯 미니 퀴즈
-                        </button>
-                    </div>
+    const problems =
+      problemsInput.trim().length === 0
+        ? []
+        : problemsInput
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+            .map((s) => Number(s))
+            .filter((n) => !Number.isNaN(n));
 
-                    <label className="input-label">공개 설정</label>
-                    <div className="private-setting">
-                        <label className="toggle-switch">
-                            <input
-                                type="checkbox"
-                                checked={isPrivate}
-                                onChange={(e) => setIsPrivate(e.target.checked)}
-                            />
-                            <span className="slider"></span>
-                        </label>
-                        <span>
-                            {isPrivate ? '비공개 방 (비밀번호 설정 기능)' : '공개 방'}
-                        </span>
-                    </div>
-                    {isPrivate && (
-                        <input
-                            type="password"
-                            placeholder="비밀번호 설정"
-                            className="input-field"
-                        />
-                    )}
+    onCreate({
+      title: title.trim(),
+      roomType,
+      isPrivate,
+      privatePassword: isPrivate ? password : undefined,
+      problems,
+    });
+  };
 
-                    <label className="input-label">최대 인원</label>
-                    <p className="max-players-info">**2명 (1:1 대결)**</p>
-                </div>
+  return (
+    <div className="modal-overlay">
+      <div className="create-room-modal">
+        <h2>새로운 대결 방 만들기 (1:1 전용)</h2>
 
-                <div className="modal-actions">
-                    <button className="create-btn">방 만들기</button>
-                    <button className="cancel-btn" onClick={onClose}>
-                        취소
-                    </button>
-                </div>
-            </div>
+        <div className="modal-content-area">
+          <label className="input-label">방 제목</label>
+          <input
+            type="text"
+            placeholder="예: 자료구조 A+ 평가 완벽"
+            className="input-field"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+
+          <label className="input-label">대결 종류</label>
+          <div className="type-selector">
+            <button
+              className={`type-btn ${roomType === '코테' ? 'active' : ''}`}
+              onClick={() => setRoomType('코테')}
+            >
+              💻 코딩 테스트
+            </button>
+            <button
+              className={`type-btn ${roomType === '미니' ? 'active' : ''}`}
+              onClick={() => setRoomType('미니')}
+            >
+              🎯 미니 퀴즈
+            </button>
+          </div>
+
+          <label className="input-label">공개 설정</label>
+          <div className="private-setting">
+            <label className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={isPrivate}
+                onChange={(e) => setIsPrivate(e.target.checked)}
+              />
+              <span className="slider"></span>
+            </label>
+            <span>
+              {isPrivate
+                ? '비공개 방 (비밀번호 설정)'
+                : '공개 방 (누구나 입장 가능)'}
+            </span>
+          </div>
+
+          {isPrivate && (
+            <input
+              type="password"
+              placeholder="비밀번호 설정"
+              className="input-field"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          )}
+
+          <label className="input-label">
+            문제 ID 목록 (선택, 예: 1,2,3)
+          </label>
+          <input
+            type="text"
+            placeholder="나중에 문제 선택 UI 붙이기 전까지는 ID를 콤마로 입력"
+            className="input-field"
+            value={problemsInput}
+            onChange={(e) => setProblemsInput(e.target.value)}
+          />
+
+          <label className="input-label">최대 인원</label>
+          <p className="max-players-info">2명 (1:1 대결 고정)</p>
         </div>
-    );
+
+        <div className="modal-actions">
+          <button className="create-btn" onClick={handleCreateClick}>
+            방 만들기
+          </button>
+          <button className="cancel-btn" onClick={onClose}>
+            취소
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
+// --- RoomItem 컴포넌트 ---
+const RoomItem: React.FC<{
+  room: Room;
+  onEnter: (room: Room) => void;
+}> = ({ room, onEnter }) => {
+  const isCote = room.type === '코테';
+  const isFull = room.currentPlayers === room.maxPlayers;
+  const isPlaying = room.status === '진행 중';
+  const canEnter = !isFull && !isPlaying;
+
+  return (
+    <div className={`room-item ${isPlaying ? 'playing' : ''}`}>
+      <div className={`room-type-tag ${isCote ? 'cote' : 'mini'}`}>
+        {room.type}
+      </div>
+
+      <div className="room-details">
+        <div className="room-title">{room.title}</div>
+        <div
+          className={`room-tier-info ${room.tier
+            .toLowerCase()
+            .replace('+', '\\+')}`}
+        >
+          {/* host 프로필 rank (A+, B0 등) */}
+          {room.tier}
+        </div>
+      </div>
+
+      <div className="room-status-actions">
+        {room.isPrivate && <span className="room-lock">🔒 잠김</span>}
+        <span className="room-privacy">
+          {room.isPrivate ? '비공개' : '공개'} ({room.status})
+        </span>
+
+        <span className={`room-players ${isFull ? 'full' : ''}`}>
+          ({room.currentPlayers}/{room.maxPlayers})
+        </span>
+
+        <button
+          className={`action-btn ${
+            canEnter ? 'enter' : isPlaying ? 'in-progress' : 'disabled'
+          }`}
+          disabled={!canEnter}
+          onClick={() => canEnter && onEnter(room)}
+        >
+          {isPlaying ? '진행 중' : canEnter ? '입장' : '대기 중'}
+        </button>
+      </div>
+    </div>
+  );
+};
 
 // --- Main Lobby Page Component ---
 const LobbyPage: React.FC = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
-    const [rooms, setRooms] = useState<Room[]>(DUMMY_ROOMS_INITIAL);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filterType, setFilterType] = useState<FilterType>('전체');
-    const [gradeFilter, setGradeFilter] = useState<Grade>('전체');
-    const [isModalOpen, setIsModalOpen] = useState(false);
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState<FilterType>('전체');
+  const [gradeFilter, setGradeFilter] = useState<GradeFilter>('전체');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const [showPasswordModal, setShowPasswordModal] = useState(false);
-    const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
 
-    // ⭐ 다크 모드 상태
-     const { theme, toggleTheme } = useTheme();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    // ⭐ 임시 로그인 정보
-    const [userInfo] = useState({
-        isLoggedIn: true,
-        nickname: "정보대1황",
-        tier: "A+",
-    });
+  // 로그인 정보
+    const [userInfo, setUserInfo] = useState<{
+    nickname: string;
+    tier: Grade | null;
+    } | null>(null);
 
-    const handleRefresh = () => {
-        console.log("방 목록 새로고침 시도");
-        setRooms([...DUMMY_ROOMS_INITIAL,
-            { id: Date.now(), type: '미니', title: '⚡️방금 생성된 새 퀴즈 방', tier: 'C+', currentPlayers: 0, maxPlayers: 2, status: '대기 중', isPrivate: false }
-        ]);
-    };
+    useEffect(() => {
+    const loadInitialData = async () => {
+        try {
+        // 1) 토큰 꺼내오기
+        // ↓ 이 키 이름은 "로그인할 때 실제로 localStorage에 뭐라고 저장했는지"랑 맞춰야 함
+        const token =
+            localStorage.getItem('accessToken') || // 예시
+            localStorage.getItem('jwt') ||
+            localStorage.getItem('token');
 
-    const filteredRooms = rooms.filter(room => {
-        const matchesSearch = room.title.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesType = filterType === '전체' || room.type === filterType;
-        const matchesGrade = gradeFilter === '전체' || room.tier === gradeFilter;
+        if (!token) {
+            // 토큰 없으면 로그인 안 된 상태
+            setUserInfo(null);
+            await loadRooms();    // 방 목록은 비로그인이어도 보이게 하고 싶으면
+            return;
+        }
 
-        return matchesSearch && matchesType && matchesGrade;
-    });
+        // 2) 프로필 먼저 불러오기
+        const profile = await fetchProfile(token);
 
-    const handleExit = () => {
-        navigate('/');
-    };
+        setUserInfo({
+            nickname: profile.nickname ?? '사용자',
+            tier: (profile.tier as Grade) ?? null,   // 'A+', 'B0' 같은 문자열
+        });
 
-    const handleMyPage = () => {
-        navigate('/me');
-    };
-
-    const handleEnterRoom = (room: Room) => {
-        if (room.isPrivate) {
-            setSelectedRoom(room);
-            setShowPasswordModal(true);
-        } else {
-            console.log(`공개 방 '${room.title}' 입장 시도`);
-            alert(`공개 방 입장: ${room.title}`);
+        // 3) 방 목록도 같이 로딩
+        await loadRooms();
+        } catch (err: any) {
+        console.error(err);
+        // 프로필 로딩 실패 → 일단 비로그인처럼 처리
+        setUserInfo(null);
+        await loadRooms();
         }
     };
 
-    const handlePasswordConfirm = (password: string) => {
-        if (selectedRoom) {
-            console.log(`[비밀번호 검증] 방: ${selectedRoom.title}, 입력된 비밀번호: ${password}`);
-            // 실제 구현에서는 서버와 통신하여 비밀번호 검증
-            if (password === '1234') { // 임시 검증
-                alert(`비밀번호 확인 성공! 방 입장: ${selectedRoom.title}`);
-            } else {
-                alert(`비밀번호가 일치하지 않습니다.`);
-            }
-        }
-        setShowPasswordModal(false);
-        setSelectedRoom(null);
-    };
+    loadInitialData();
+    }, []);
 
 
-    return (
-        // ⭐ 다크 모드 클래스 동적 적용
-        <div className={`lobby-container ${theme === "dark" ? "dark-mode" : ""}`}>
-            {/* 🏆 헤더 (상단) */}
-            <div className="lobby-header-final">
-                <button className="exit-btn" onClick={handleExit}>
-                    ← 나가기
-                </button>
-                <div className="header-spacer"></div>
 
-                {/* ☀️/🌙 다크 모드 토글 버튼 */}
-                <button className="theme-toggle-btn-lobby" onClick={toggleTheme}>
-  {theme === "dark" ? "☀ Light Mode" : "🌙 Dark Mode"}
-</button>
-          
+  const loadRooms = async () => {
+    try {
+        setLoading(true);
+        setError(null);
+        const data = await fetchBattleRooms();
+        setRooms(data);
+    } catch (e) {
+        console.error(e);
+        setError('방 목록을 불러오는 중 오류가 발생했습니다.');
+    } finally {
+        setLoading(false);
+    }
+};
 
-                {/* ⭐ 사용자 정보 표시 영역 */}
-                {userInfo.isLoggedIn ? (
-                    <div className={`user-info-display tier-${userInfo.tier.toLowerCase().replace('+', '\\+')}`}>
-                        <span className="user-nickname">{userInfo.nickname}</span>
-                        <span className="user-tier">({userInfo.tier})</span>
-                    </div>
-                ) : (
-                    <div className="user-info-display not-logged-in">
-                        로그인 필요
-                    </div>
-                )}
+  const handleRefresh = () => {
+    loadRooms();
+  };
 
-                <button className="mypage-btn" onClick={handleMyPage}>
-                    👤 마이페이지
-                </button>
-            </div>
+  const filteredRooms = rooms.filter((room) => {
+    const matchesSearch = room.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
 
-            {/* ⭐ 방 만들기 버튼을 검색/필터 영역 위에 배치 */}
-            <div className="create-room-area">
-                <button className="create-room-btn large-create-btn" onClick={() => setIsModalOpen(true)}>
-                    + 방 만들기
-                </button>
-            </div>
+    const matchesType =
+      filterType === '전체' ? true : room.type === filterType;
 
-            {/* 검색 및 필터링 영역 */}
-            <div className="search-filter-area">
-                <input
-                    type="text"
-                    placeholder="방 제목으로 검색..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="search-input"
-                />
-                <div className="filter-group">
-                    {/* 방 종류 필터 */}
-                    <div className="filter-buttons type-filter">
-                        {['전체', '코테', '미니'].map((type) => (
-                            <button
-                                key={type}
-                                className={`filter-btn ${filterType === type ? 'active' : ''}`}
-                                onClick={() => setFilterType(type as FilterType)}
-                            >
-                                {type}
-                            </button>
-                        ))}
-                    </div>
+    const matchesGrade =
+      gradeFilter === '전체' ? true : room.tier === gradeFilter;
 
-                    {/* 학점 티어 필터 */}
-                    <div className="filter-buttons grade-filter">
-                        {GRADES.map((grade) => (
-                            <button
-                                key={grade}
-                                className={`grade-btn ${gradeFilter === grade ? 'active' : ''}`}
-                                onClick={() => setGradeFilter(grade)}
-                            >
-                                {grade}
-                            </button>
-                        ))}
-                    </div>
+    return matchesSearch && matchesType && matchesGrade;
+  });
 
-                    {/* 새로고침 버튼 */}
-                    <button className="refresh-btn" onClick={handleRefresh}>
-                        🔄 새로고침
-                    </button>
-                </div>
-            </div>
+  const handleExit = () => {
+    navigate('/');
+  };
 
-            {/* 방 목록 (Room List) 영역 (이전과 동일) */}
-            <div className="room-list-container">
-                {filteredRooms.map(room => (
-                    <RoomItem key={room.id} room={room} onEnter={handleEnterRoom} />
-                ))}
-                <p className="private-room-guide">
-                    **비공개 방 테스트** (PW: 1234)
-                </p>
-            </div>
+  const handleMyPage = () => {
+    navigate('/me');
+  };
 
-            {/* 모달 */}
-            {isModalOpen && <CreateRoomModal onClose={() => setIsModalOpen(false)} />}
-            {showPasswordModal && selectedRoom && (
-                <PasswordModal
-                    roomTitle={selectedRoom.title}
-                    onClose={() => {setShowPasswordModal(false); setSelectedRoom(null);}}
-                    onConfirm={handlePasswordConfirm}
-                />
+  const navigateToMatch = (matchId?: number) => {
+    if (!matchId) {
+      // 서버에서 match_id 안 내려주면 나중에 여기 수정
+      alert('방 입장에 성공했습니다. (match_id 없음)');
+      return;
+    }
+    navigate(`/battles/${matchId}`);
+  };
+
+  const handleEnterRoom = async (room: Room) => {
+    if (room.isPrivate) {
+      setSelectedRoom(room);
+      setShowPasswordModal(true);
+      return;
+    }
+
+    try {
+      const res = await joinBattleRoom(room.id);
+      navigateToMatch(res.match_id);
+    } catch (e) {
+      console.error(e);
+      alert('방 입장에 실패했습니다.');
+    }
+  };
+
+  const handlePasswordConfirm = async (password: string) => {
+    if (!selectedRoom) return;
+
+    try {
+      await verifyRoomPassword(selectedRoom.id, password);
+      const res = await joinBattleRoom(selectedRoom.id);
+      navigateToMatch(res.match_id);
+    } catch (e) {
+      console.error(e);
+      alert('비밀번호가 일치하지 않거나 방 입장에 실패했습니다.');
+    } finally {
+      setShowPasswordModal(false);
+      setSelectedRoom(null);
+    }
+  };
+
+  const handleCreateRoom = async (form: CreateRoomForm) => {
+    try {
+      const payload = {
+        title: form.title,
+        is_cote: form.roomType === '코테',
+        is_private: form.isPrivate,
+        private_password: form.privatePassword,
+        problems: form.problems,
+      };
+
+      const newRoom = await createBattleRoom(payload);
+      // 새로 만든 방을 맨 앞에 추가
+      setRooms((prev) => [newRoom, ...prev]);
+      setIsModalOpen(false);
+    } catch (e) {
+      console.error(e);
+      alert('대결 방 생성에 실패했습니다.');
+    }
+  };
+
+  return (
+    <div className={`lobby-container ${theme === 'dark' ? 'dark-mode' : ''}`}>
+      {/* 🏆 헤더 (상단) */}
+      <div className="lobby-header-final">
+        <button className="exit-btn" onClick={handleExit}>
+          ← 나가기
+        </button>
+        <div className="header-spacer"></div>
+
+        {/* ☀️/🌙 다크 모드 토글 버튼 */}
+        <button className="theme-toggle-btn-lobby" onClick={toggleTheme}>
+          {theme === 'dark' ? '☀ Light Mode' : '🌙 Dark Mode'}
+        </button>
+
+        {/* ⭐ 사용자 정보 표시 영역 */}
+        {userInfo ? (
+          <div
+            className={`user-info-display ${
+              userInfo.tier
+                ? `tier-${userInfo.tier.toLowerCase().replace('+', '\\+')}`
+                : ''
+            }`}
+          >
+            <span className="user-nickname">{userInfo.nickname}</span>
+            {userInfo.tier && (
+              <span className="user-tier">({userInfo.tier})</span>
             )}
+          </div>
+        ) : (
+          <div className="user-info-display not-logged-in">로그인 필요</div>
+        )}
+
+        <button className="mypage-btn" onClick={handleMyPage}>
+          👤 마이페이지
+        </button>
+      </div>
+
+      {/* ⭐ 방 만들기 버튼 */}
+      <div className="create-room-area">
+        <button
+          className="create-room-btn large-create-btn"
+          onClick={() => setIsModalOpen(true)}
+        >
+          + 방 만들기
+        </button>
+      </div>
+
+      {/* 검색 및 필터링 영역 */}
+      <div className="search-filter-area">
+        <input
+          type="text"
+          placeholder="방 제목으로 검색..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-input"
+        />
+        <div className="filter-group">
+          {/* 방 종류 필터 */}
+          <div className="filter-buttons type-filter">
+            {(['전체', '코테', '미니'] as FilterType[]).map((type) => (
+              <button
+                key={type}
+                className={`filter-btn ${
+                  filterType === type ? 'active' : ''
+                }`}
+                onClick={() => setFilterType(type)}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
+
+          {/* 학점 티어 필터 (host rank 기준) */}
+          <div className="filter-buttons grade-filter">
+            {GRADE_FILTERS.map((grade) => (
+              <button
+                key={grade}
+                className={`grade-btn ${
+                  gradeFilter === grade ? 'active' : ''
+                }`}
+                onClick={() => setGradeFilter(grade)}
+              >
+                {grade}
+              </button>
+            ))}
+          </div>
+
+          {/* 새로고침 버튼 */}
+          <button className="refresh-btn" onClick={handleRefresh}>
+            🔄 새로고침
+          </button>
         </div>
-    );
+      </div>
+
+      {/* 방 목록 */}
+      <div className="room-list-container">
+        {loading && <p className="room-list-message">방 목록 불러오는 중...</p>}
+        {error && <p className="room-list-error">{error}</p>}
+        {!loading && !error && filteredRooms.length === 0 && (
+          <p className="room-list-message">조건에 맞는 방이 없습니다.</p>
+        )}
+
+        {filteredRooms.map((room) => (
+          <RoomItem key={room.id} room={room} onEnter={handleEnterRoom} />
+        ))}
+      </div>
+
+      {/* 모달들 */}
+      {isModalOpen && (
+        <CreateRoomModal
+          onClose={() => setIsModalOpen(false)}
+          onCreate={handleCreateRoom}
+        />
+      )}
+      {showPasswordModal && selectedRoom && (
+        <PasswordModal
+          roomTitle={selectedRoom.title}
+          onClose={() => {
+            setShowPasswordModal(false);
+            setSelectedRoom(null);
+          }}
+          onConfirm={handlePasswordConfirm}
+        />
+      )}
+    </div>
+  );
 };
 
 export default LobbyPage;
