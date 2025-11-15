@@ -1,0 +1,855 @@
+:root {
+  /* 기본 (라이트 모드) */
+  --loop-bg: #f5f7ff;
+  --loop-primary: #4f5dff;
+  --loop-primary-dark: #3746f3;
+  --loop-border: #e1e7f5;
+  --loop-text-main: #111827;
+  --loop-text-sub: #6b7280;
+  --loop-text-soft: #9ca3af;
+}
+
+/* 다크 모드일 때 변수만 바꿔주기 */
+.loop-root.dark-mode {
+  --loop-bg: #020617;
+  --loop-primary: #ff7bff;
+  --loop-primary-dark: #e454ff;
+  --loop-border: #1f2937;
+  --loop-text-main: #e5e7eb;
+  --loop-text-sub: #9ca3af;
+  --loop-text-soft: #6b7280;
+}
+
+/* 전체 레이아웃 */
+
+.loop-root {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--loop-bg);
+  color: var(--loop-text-main);
+  overflow: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+/* 상단 바 */
+
+.loop-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 2.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+}
+
+.loop-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.loop-logo {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 1rem;
+  background: var(--loop-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.loop-brand-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* 오른쪽: 토글 + 버전 */
+.loop-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.loop-theme-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.8);
+  background: #0f172a;
+  color: #e5e7eb;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease,
+    border-color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+}
+
+.loop-theme-toggle:hover {
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.4);
+  transform: translateY(-1px);
+}
+
+.loop-theme-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+  background: #fbbf24;
+  box-shadow: 0 0 8px rgba(250, 204, 21, 0.9);
+}
+
+.loop-theme-label {
+  white-space: nowrap;
+}
+
+.loop-version {
+  font-size: 0.8rem;
+  color: var(--loop-text-soft);
+}
+
+/* 매치 헤더 */
+
+.loop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2.5rem 0.8rem;
+  gap: 1.5rem;
+}
+
+.loop-match-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.loop-match-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--loop-text-soft);
+  font-weight: 600;
+}
+
+.loop-vs-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.loop-player-me {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.loop-player-enemy {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--loop-primary);
+}
+
+.loop-vs {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #9ca3af;
+}
+
+.loop-category-text {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.loop-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.loop-timer {
+  text-align: right;
+}
+
+.loop-timer-label {
+  font-size: 0.8rem;
+  color: var(--loop-text-sub);
+}
+
+.loop-timer-value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.loop-exit-btn {
+  padding: 0.55rem 1.4rem;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #4b5563;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.loop-exit-btn:hover {
+  background: #f3f4f6;
+  box-shadow: 0 4px 10px rgba(148, 163, 184, 0.3);
+}
+
+/* 대기 배너 */
+
+.loop-wait-banner {
+  margin: 0 2.5rem 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  background: #e0ebff;
+  border: 1px solid #c4d6ff;
+  color: #1d4ed8;
+  font-size: 0.85rem;
+}
+
+/* 메인 */
+
+.loop-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0 2.5rem 1.5rem;
+  overflow: hidden;
+}
+
+.loop-left,
+.loop-right {
+  min-height: 0;
+}
+
+@media (min-width: 1024px) {
+  .loop-main {
+    flex-direction: row;
+  }
+  .loop-left {
+    flex: 1;
+  }
+  .loop-right {
+    width: 360px;
+    flex-shrink: 0;
+  }
+}
+
+/* 문제 카드 */
+
+.loop-question-card {
+  height: 100%;
+  background: #ffffff;
+  border-radius: 32px;
+  border: 1px solid var(--loop-border);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.04);
+  padding: 1.8rem 2rem 1.6rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.loop-question-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.4rem;
+}
+
+.loop-question-tags {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.loop-q-badge {
+  padding: 0.3rem 1.2rem;
+  border-radius: 999px;
+  background: var(--loop-primary);
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.loop-tag-list {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.loop-tag-chip {
+  padding: 0.25rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid #d4ddff;
+  background: #ffffff;
+  font-size: 0.8rem;
+  color: #374151;
+}
+
+/* 현재 문제 메타 */
+
+.loop-current-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.85rem;
+}
+
+.loop-current-pill {
+  padding: 0.25rem 0.9rem;
+  border-radius: 999px;
+  background: #edf1ff;
+  color: var(--loop-primary);
+  font-weight: 600;
+}
+
+.loop-current-index {
+  color: var(--loop-text-sub);
+}
+
+.loop-current-index-strong {
+  color: #111827;
+  font-weight: 600;
+}
+
+/* 문제 내용 */
+
+.loop-question-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.loop-question-title {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.6;
+  color: #111827;
+  margin-bottom: 0.75rem;
+}
+
+.loop-question-subtext {
+  font-size: 0.9rem;
+  color: var(--loop-text-sub);
+  line-height: 1.6;
+}
+
+/* 답안 영역 */
+
+.loop-answer-section {
+  margin-top: 1.8rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid #ebeff7;
+}
+
+.loop-answer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.loop-answer-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.loop-answer-bar {
+  width: 3px;
+  height: 1.1rem;
+  border-radius: 999px;
+  background: var(--loop-primary);
+}
+
+.loop-answer-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.loop-answer-tip {
+  font-size: 0.8rem;
+  color: var(--loop-text-sub);
+}
+
+.loop-answer-textarea {
+  width: 100%;
+  min-height: 7rem;
+  max-height: 10.5rem;
+  padding: 0.8rem 1rem;
+  border-radius: 18px;
+  border: 1px solid #e1e6f0;
+  background: #f5f7fb;
+  font-size: 0.9rem;
+  resize: none;
+  color: #111827;
+}
+
+.loop-answer-textarea::placeholder {
+  color: #9ca3af;
+}
+
+.loop-answer-textarea:focus {
+  outline: none;
+  border-color: var(--loop-primary);
+  box-shadow: 0 0 0 1px rgba(79, 93, 255, 0.2);
+}
+
+.loop-answer-textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 버튼 공통 */
+
+.loop-primary-btn {
+  border: none;
+  cursor: pointer;
+  background: var(--loop-primary);
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  padding: 0.75rem 1.5rem;
+  box-shadow: 0 12px 25px rgba(79, 93, 255, 0.35);
+  transition: background 0.15s ease, transform 0.05s ease,
+    box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.loop-primary-btn:hover {
+  background: var(--loop-primary-dark);
+  transform: translateY(-1px);
+}
+
+.loop-primary-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.loop-answer-submit {
+  width: 100%;
+  margin-top: 1.1rem;
+}
+
+/* 오른쪽 컬럼 */
+
+.loop-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* 상대 진행 카드 */
+
+.loop-opponent-card {
+  background: #ffffff;
+  border-radius: 28px;
+  border: 1px solid var(--loop-border);
+  padding: 1.2rem 1.4rem 1.2rem;
+  box-shadow: 0 12px 25px rgba(148, 163, 184, 0.15);
+}
+
+.loop-opponent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.9rem;
+}
+
+.loop-subtitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.loop-opponent-name {
+  font-size: 0.8rem;
+  color: var(--loop-text-sub);
+}
+
+.loop-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.loop-progress-bar {
+  flex: 1;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: #edf2ff;
+  overflow: hidden;
+}
+
+.loop-progress-fill {
+  height: 100%;
+  background: var(--loop-primary);
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+.loop-progress-text {
+  font-size: 0.8rem;
+  color: var(--loop-text-sub);
+  min-width: 3rem;
+  text-align: right;
+}
+
+.loop-opponent-message {
+  font-size: 0.85rem;
+  color: var(--loop-text-sub);
+}
+
+/* 채팅 카드 */
+
+.loop-chat-card {
+  flex: 1;
+  min-height: 0;
+  background: #ffffff;
+  border-radius: 28px;
+  border: 1px solid var(--loop-border);
+  padding: 1.2rem 1.4rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 25px rgba(148, 163, 184, 0.15);
+}
+
+.loop-chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.7rem;
+}
+
+.loop-chat-hint {
+  font-size: 0.9rem;
+  color: var(--loop-text-soft);
+}
+
+.loop-chat-body {
+  flex: 1;
+  min-height: 0;
+  background: #f5f7fb;
+  border-radius: 18px;
+  border: 1px solid #e1e6f0;
+  padding: 0.6rem;
+  overflow-y: auto;
+}
+
+.loop-chat-row {
+  display: flex;
+  margin-bottom: 0.3rem;
+}
+
+.loop-chat-row-me {
+  justify-content: flex-end;
+}
+
+.loop-chat-bubble {
+  max-width: 80%;
+  padding: 0.36rem 0.8rem;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #e1e6f0;
+  font-size: 0.85rem;
+  color: #111827;
+}
+
+.loop-chat-bubble-me {
+  background: var(--loop-primary);
+  border-color: var(--loop-primary);
+  color: #ffffff;
+}
+
+.loop-chat-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.6rem;
+}
+
+.loop-chat-input {
+  flex: 1;
+  border-radius: 12px;
+  border: 1px solid #e1e6f0;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+.loop-chat-input::placeholder {
+  color: #9ca3af;
+}
+
+.loop-chat-input:focus {
+  outline: none;
+  border-color: var(--loop-primary);
+  box-shadow: 0 0 0 1px rgba(79, 93, 255, 0.18);
+}
+
+.loop-chat-input:disabled {
+  background: #f5f7fb;
+  color: var(--loop-text-sub);
+}
+
+.loop-chat-send-btn {
+  padding: 0.45rem 0.9rem;
+  border-radius: 12px;
+  border: none;
+  background: var(--loop-primary);
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.loop-chat-send-btn:hover {
+  background: var(--loop-primary-dark);
+}
+
+.loop-chat-send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* 모달 */
+
+.loop-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+}
+
+.loop-modal {
+  width: 100%;
+  max-width: 400px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 1.4rem 1.6rem 1.2rem;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.3);
+}
+
+.loop-modal-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.loop-modal-text {
+  font-size: 0.9rem;
+  color: var(--loop-text-sub);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.loop-modal-text strong {
+  color: var(--loop-text-main);
+}
+
+.loop-modal-single-btn {
+  width: 100%;
+}
+
+.loop-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.loop-secondary-btn,
+.loop-danger-btn {
+  border-radius: 999px;
+  font-size: 0.85rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.loop-secondary-btn {
+  background: #f3f4f6;
+  color: #374151;
+  border-color: #e5e7eb;
+}
+
+.loop-secondary-btn:hover {
+  background: #e5e7eb;
+}
+
+.loop-danger-btn {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+}
+
+.loop-danger-btn:hover {
+  background: #dc2626;
+}
+
+/* ===================== */
+/* 다크 모드 전용 오버라이드 */
+/* ===================== */
+
+.loop-root.dark-mode .loop-topbar {
+  background: rgba(15, 23, 42, 0.95);
+  border-bottom-color: #0b1120;
+}
+
+.loop-root.dark-mode .loop-brand-name {
+  background: linear-gradient(135deg, #ffeb70, #ff7bff);
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.loop-root.dark-mode .loop-theme-toggle {
+  background-image: linear-gradient(135deg, #ffeb70, #ff7bff);
+  color: #111827;
+  border-color: transparent;
+}
+
+.loop-root.dark-mode .loop-theme-dot {
+  background: #111827;
+  box-shadow: 0 0 10px rgba(15, 23, 42, 0.9);
+}
+
+.loop-root.dark-mode .loop-match-label {
+  color: #6b7280;
+}
+
+.loop-root.dark-mode .loop-category-text {
+  color: #9ca3af;
+}
+
+.loop-root.dark-mode .loop-timer-value {
+  color: #e5e7eb;
+}
+
+.loop-root.dark-mode .loop-subtitle {
+  color: #e5e7eb;
+}
+
+.loop-root.dark-mode .loop-current-index-strong {
+  color: #e5e7eb;
+}
+
+.loop-root.dark-mode .loop-exit-btn {
+  background: #020617;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.loop-root.dark-mode .loop-exit-btn:hover {
+  background: #111827;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.7);
+}
+
+/* 카드들 다크 배경 */
+
+.loop-root.dark-mode .loop-question-card,
+.loop-root.dark-mode .loop-opponent-card,
+.loop-root.dark-mode .loop-chat-card {
+  background: #020617;
+  border-color: #111827;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.8);
+}
+
+.loop-root.dark-mode .loop-question-title {
+  color: #f9fafb;
+}
+
+.loop-root.dark-mode .loop-question-subtext,
+.loop-root.dark-mode .loop-opponent-message,
+.loop-root.dark-mode .loop-chat-hint {
+  color: #ffffff;
+}
+
+.loop-root.dark-mode .loop-answer-tip {
+    size: 0.9rem;
+    color: #ffffff;
+}
+
+/* 답안/채팅 영역 */
+
+.loop-root.dark-mode .loop-answer-section {
+  border-top-color: #111827;
+}
+
+.loop-root.dark-mode .loop-answer-textarea {
+  background: #020617;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.loop-root.dark-mode .loop-answer-textarea::placeholder {
+  color: #dbd4d4;
+}
+
+.loop-root.dark-mode .loop-chat-body {
+  background: #020617;
+  border-color: #111827;
+}
+
+.loop-root.dark-mode .loop-chat-input {
+  background: #020617;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.loop-root.dark-mode .loop-chat-input::placeholder {
+  color: #6b7280;
+}
+
+/* 상대 진행 바 – 여기서 예쁜 그라디언트 사용 */
+
+.loop-root.dark-mode .loop-progress-bar {
+  background: #111827;
+}
+
+.loop-root.dark-mode .loop-progress-fill {
+  background-image: linear-gradient(135deg, #ffeb70, #ff7bff);
+}
+
+/* 채팅 말풍선 */
+
+.loop-root.dark-mode .loop-chat-bubble {
+  background: #020617;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.loop-root.dark-mode .loop-chat-bubble-me {
+  background-image: linear-gradient(135deg, #ffeb70, #ff7bff);
+  border-color: transparent;
+  color: #111827;
+}
+
+/* 모달 */
+
+.loop-root.dark-mode .loop-modal {
+  background: #020617;
+  border-color: #111827;
+}
+
+.loop-root.dark-mode .loop-modal-title {
+  color: #f9fafb;
+}

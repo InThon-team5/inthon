@@ -11,3 +11,189 @@ body {
 #root {
   @apply min-h-screen;
 }
+
+/* === Battle intro animations (bigger & more epic) === */
+
+@keyframes intro-zoom {
+  0% {
+    transform: scale(1.08);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes intro-slide-left {
+  0% {
+    opacity: 0;
+    transform: translateX(-80px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes intro-slide-right {
+  0% {
+    opacity: 0;
+    transform: translateX(80px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(-6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes intro-vs-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4) rotate(-15deg);
+    box-shadow: 0 0 0 rgba(248, 250, 252, 0);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.15) rotate(3deg);
+    box-shadow: 0 0 50px rgba(248, 250, 252, 0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    box-shadow: 0 0 36px rgba(248, 250, 252, 0.7);
+  }
+}
+
+@keyframes intro-ring-pulse {
+  0% {
+    opacity: 0.2;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+}
+
+@keyframes intro-name-glow {
+  0% {
+    text-shadow: 0 0 0 rgba(248, 250, 252, 0);
+  }
+  50% {
+    text-shadow: 0 0 24px rgba(248, 250, 252, 0.6);
+  }
+  100% {
+    text-shadow: 0 0 12px rgba(248, 250, 252, 0.4);
+  }
+}
+
+@keyframes intro-sub-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes intro-count-pulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+    letter-spacing: 0.15em;
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.08);
+    letter-spacing: 0.35em;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    letter-spacing: 0.3em;
+  }
+}
+
+.intro-root {
+  animation: intro-zoom 1.2s ease-out forwards;
+}
+
+.intro-container {
+  animation: intro-sub-fade 0.6s ease-out forwards;
+}
+
+.intro-slide-left {
+  opacity: 0;
+  animation: intro-slide-left 0.7s ease-out 0.1s forwards;
+}
+
+.intro-slide-right {
+  opacity: 0;
+  animation: intro-slide-right 0.7s ease-out 0.1s forwards;
+}
+
+.intro-vs-pop {
+  opacity: 0;
+  animation: intro-vs-pop 0.7s ease-out 0.3s forwards;
+}
+
+.intro-ring {
+  animation: intro-ring-pulse 1.4s ease-out 0.4s forwards;
+}
+
+.intro-name {
+  animation: intro-name-glow 1.6s ease-out 0.3s forwards;
+}
+
+.intro-sub {
+  opacity: 0;
+  animation: intro-sub-fade 0.6s ease-out 0.8s forwards;
+}
+
+.intro-count {
+  opacity: 0;
+  animation: intro-count-pulse 0.8s ease-out 1s forwards;
+}
+
+/* ===== 공통 스크롤 스타일 ===== */
+.nice-scroll {
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #475569 #020617; /* thumb / track */
+}
+
+/* Chrome, Edge, Safari */
+.nice-scroll::-webkit-scrollbar {
+  width: 8px;              /* 스크롤바 두께 */
+}
+
+.nice-scroll::-webkit-scrollbar-track {
+  background: transparent; /* 트랙 배경 */
+}
+
+.nice-scroll::-webkit-scrollbar-thumb {
+  background: #1e293b;     /* 기본 색 */
+  border-radius: 9999px;   /* 완전 동글동글 */
+}
+
+.nice-scroll::-webkit-scrollbar-thumb:hover {
+  background: #38bdf8;     /* hover 시 살짝 강조 */
+}
