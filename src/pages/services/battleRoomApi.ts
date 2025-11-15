@@ -16,7 +16,7 @@ export type Grade =
   | 'F';
 
 export type BattleType = '코테' | '미니';
-export type RoomStatus = '대기 중' | '진행 중';
+export type RoomStatus = '대기' | '진행';
 
 // 실제 화면에서 사용하는 Room 타입
 export interface Room {
@@ -49,7 +49,7 @@ interface BattleRoomDto {
   status: string;              // 예: 'WAITING', 'IN_PROGRESS' 등
   current_players: number;
   max_players: number;
-  host_rank: Grade;            // host 프로필 rank 조인해서 내려주기
+  host_rank?: Grade;            // host 프로필 rank 조인해서 내려주기
   // host_id?: number;
   // host_nickname?: string;
 }
@@ -79,19 +79,19 @@ export interface SubmissionDto {
 // ✅ profileApi랑 동일한 규칙으로 base URL
 const API_BASE_URL =
   // Vite 기준. 환경변수 없으면 상대 경로로 요청
-  import.meta?.env?.VITE_API_BASE_URL ?? '';
+  import.meta.env.VITE_API_BASE_URL;
 
 function getAuthHeaders(): Record<string, string> {
   // 로그인할 때 localStorage에 저장한 키와 맞추기
-  const token = localStorage.getItem('jwt') || localStorage.getItem('token');
+  const token = localStorage.getItem('loop_access');
   return token
     ? { Authorization: `Bearer ${token}` }
     : {};
 }
 
 function mapStatus(status: string): RoomStatus {
-  if (status === 'IN_PROGRESS' || status === 'PLAYING') return '진행 중';
-  return '대기 중';
+  if (status === 'IN_PROGRESS' || status === 'PLAYING') return '진행';
+  return '대기';
 }
 
 function mapBattleType(is_cote: boolean): BattleType {
@@ -99,6 +99,9 @@ function mapBattleType(is_cote: boolean): BattleType {
 }
 
 function mapRoomDto(dto: BattleRoomDto): Room {
+  // ensure tier is always present; fallback to 'F' if backend didn't provide it
+  const tier: Grade = dto.host_rank ?? 'F';
+
   return {
     id: dto.id,
     title: dto.title,
@@ -107,7 +110,7 @@ function mapRoomDto(dto: BattleRoomDto): Room {
     status: mapStatus(dto.status),
     currentPlayers: dto.current_players,
     maxPlayers: dto.max_players,
-    tier: dto.host_rank,
+    tier,
   };
 }
 

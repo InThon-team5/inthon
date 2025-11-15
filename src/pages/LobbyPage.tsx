@@ -234,9 +234,14 @@ const RoomItem: React.FC<{
   onEnter: (room: Room) => void;
 }> = ({ room, onEnter }) => {
   const isCote = room.type === '코테';
-  const isFull = room.currentPlayers === room.maxPlayers;
-  const isPlaying = room.status === '진행 중';
-  const canEnter = !isFull && !isPlaying;
+
+  // 백엔드에서 mapStatus 로 '대기 중' / '진행 중' 만 오니까 이걸로만 판단
+  const isPlaying = room.status === '진행';
+  const canEnter = !isPlaying;   // '대기 중'이면 항상 입장 가능하게
+
+  const tierClass = room.tier
+    ? `tier-${room.tier.toLowerCase().replace('+', 'plus')}`
+    : '';
 
   return (
     <div className={`room-item ${isPlaying ? 'playing' : ''}`}>
@@ -246,13 +251,8 @@ const RoomItem: React.FC<{
 
       <div className="room-details">
         <div className="room-title">{room.title}</div>
-        <div
-          className={`room-tier-info ${room.tier
-            .toLowerCase()
-            .replace('+', '\\+')}`}
-        >
-          {/* host 프로필 rank (A+, B0 등) */}
-          {room.tier}
+        <div className={`room-tier-info ${tierClass}`}>
+          {room.tier ?? '—'}
         </div>
       </div>
 
@@ -262,7 +262,7 @@ const RoomItem: React.FC<{
           {room.isPrivate ? '비공개' : '공개'} ({room.status})
         </span>
 
-        <span className={`room-players ${isFull ? 'full' : ''}`}>
+        <span className={`room-players`}>
           ({room.currentPlayers}/{room.maxPlayers})
         </span>
 
@@ -379,45 +379,45 @@ const LobbyPage: React.FC = () => {
     navigate('/me');
   };
 
-  const navigateToMatch = (matchId?: number) => {
-    if (!matchId) {
-        alert('방 입장에 성공했습니다. (match_id 없음)');
-        return;
-    }
-    navigate(`/battles/${matchId}`);
-    };
+  // matchId 가 있으면 matchId, 없으면 roomId 로 이동
+  const navigateToMatch = (roomId: number, matchId?: number) => {
+    const targetId = matchId ?? roomId;
+    navigate(`/battle/${targetId}`);   // ✅ router path 와 일치
+  };
 
   const handleEnterRoom = async (room: Room) => {
     if (room.isPrivate) {
-        setSelectedRoom(room);
-        setShowPasswordModal(true);
-        return;
+      setSelectedRoom(room);
+      setShowPasswordModal(true);
+      return;
     }
 
     try {
-        const res = await joinBattleRoom(room.id);
-        navigateToMatch(res.match_id);
+      const res = await joinBattleRoom(room.id);
+      // res.match_id 가 없으면 room.id 로라도 이동
+      navigateToMatch(room.id, res.match_id);
     } catch (e) {
-        console.error(e);
-        alert('방 입장에 실패했습니다.');
+      console.error(e);
+      alert('방 입장에 실패했습니다.');
     }
-    };
+  };
 
-    const handlePasswordConfirm = async (password: string) => {
+  const handlePasswordConfirm = async (password: string) => {
     if (!selectedRoom) return;
 
     try {
-        await verifyRoomPassword(selectedRoom.id, password);
-        const res = await joinBattleRoom(selectedRoom.id);
-        navigateToMatch(res.match_id);
+      await verifyRoomPassword(selectedRoom.id, password);
+      const res = await joinBattleRoom(selectedRoom.id);
+      navigateToMatch(selectedRoom.id, res.match_id);
     } catch (e) {
-        console.error(e);
-        alert('비밀번호가 일치하지 않거나 방 입장에 실패했습니다.');
+      console.error(e);
+      alert('비밀번호가 일치하지 않거나 방 입장에 실패했습니다.');
     } finally {
-        setShowPasswordModal(false);
-        setSelectedRoom(null);
+      setShowPasswordModal(false);
+      setSelectedRoom(null);
     }
-    };
+  };
+
 
   const handleCreateRoom = async (form: CreateRoomForm) => {
     try {
@@ -458,7 +458,7 @@ const LobbyPage: React.FC = () => {
           <div
             className={`user-info-display ${
               userInfo.tier
-                ? `tier-${userInfo.tier.toLowerCase().replace('+', '\\+')}`
+                ? `tier-${userInfo.tier.toLowerCase().replace('+', 'plus')}`
                 : ''
             }`}
           >
