@@ -9,9 +9,10 @@ import {
   type TechStackRef,
   type Profile,
 } from "./services/profileApi";
+import { useTheme } from "../ThemeProvider";
 
 export default function MyPage() {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const { theme, toggleTheme } = useTheme();
 
   // 데모용 최근 전적 (나중에 API 붙이면 교체)
   const recentRecords = [
@@ -59,8 +60,7 @@ export default function MyPage() {
     );
   };
 
-  const toggleTheme = () =>
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+
 
   const getResultBadgeClass = (result: string) => {
     const upper = result.toUpperCase();
@@ -176,13 +176,11 @@ export default function MyPage() {
     }
   };
 
+  
+ 
 
   return (
-    <div
-      className={`mypage-root ${
-        theme === "dark" ? "theme-dark" : "theme-light"
-      }`}
-    >
+    <div className={`loop-root ${theme === "dark" ? "dark-mode" : ""}`}>
       {/* 전역 에러 표시 */}
       {error && (
         <div className="alert alert-danger text-center m-0 rounded-0">
