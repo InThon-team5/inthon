@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { BattleIntroOverlay } from "../components/BattleIntroOverlay";
 import "./BattlePage.css";
 
@@ -7,11 +7,21 @@ const BATTLE_DURATION = 180; // 3분
 const TOTAL_QUESTIONS = 5;
 
 type BattleStage = "waiting" | "intro" | "playing" | "finished";
+type QuestionType = "subjective" | "multiple_choice";
 
 type ChatMessage = {
   id: number;
   sender: "me" | "opponent";
   text: string;
+};
+
+type Question = {
+  id: number;
+  type: QuestionType;
+  title: string;
+  description: string;
+  subject: string;
+  options?: string[];
 };
 
 export default function BattlePage() {
@@ -27,6 +37,8 @@ export default function BattlePage() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     { id: 1, sender: "opponent", text: "GLHF 👋" },
   ]);
+  const chatBodyRef = useRef<HTMLDivElement | null>(null);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
 
   // 상대 진행 상황 (나중에 소켓/서버 이벤트로 교체)
   const [opponentSolved, setOpponentSolved] = useState(0);
@@ -40,6 +52,23 @@ export default function BattlePage() {
   // 모달
   const [showTimeUpModal, setShowTimeUpModal] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
+
+  const currentQuestion: Question = {
+    id: 1,
+    type: "multiple_choice", // "subjective" 로 바꾸면 바로 주관식 모드
+    title:
+      "[예시 문제] 프로세스와 스레드의 차이를 간단히 설명하고, 멀티스레딩의 장점 2가지를 서술하시오.",
+    description:
+      "실제 구현에서는 서버에서 받은 문제 데이터를 이 영역에 렌더링하면 됩니다.",
+    options: [
+      "프로세스는 독립된 메모리 공간을 가지지만 스레드는 같은 프로세스의 메모리를 공유한다.",
+      "스레드는 항상 단일 코어에서만 실행된다.",
+      "멀티스레딩은 I/O 대기 시간을 활용해 CPU 활용도를 높일 수 있다.",
+      "멀티스레딩은 항상 성능 저하를 유발한다.",
+    ],
+    subject:
+      "OS"
+  };
 
   // DEV: 입장 후 1.2초 뒤 intro 로 전환
   useEffect(() => {
@@ -76,6 +105,12 @@ export default function BattlePage() {
     }
   }, [secondsLeft, stage]);
 
+  useEffect(() => {
+    if (!chatBodyRef.current) return;
+    const el = chatBodyRef.current;
+    el.scrollTop = el.scrollHeight;
+  }, [messages]);
+
   const formattedTime = () => {
     const m = Math.floor(secondsLeft / 60)
       .toString()
@@ -85,10 +120,22 @@ export default function BattlePage() {
   };
 
   const handleSubmitAnswer = () => {
-    if (!answer.trim()) return;
-    console.log("제출된 답안:", answer);
-    // TODO: 서버 제출 + 상대 진행 상황 업데이트
-    alert("답안을 제출했습니다! (나중에 API 연동 예정)");
+    if (currentQuestion.type === "subjective") {
+      if (!answer.trim()) return;
+      console.log("제출된 주관식 답안:", answer);
+      // TODO: 서버 제출
+      alert("주관식 답안을 제출했습니다! (나중에 API 연동 예정)");
+    } else {
+      if (selectedOption === null) return;
+      const selectedText = currentQuestion.options?.[selectedOption];
+      console.log(
+        "제출된 객관식 답안:",
+        selectedOption,
+        selectedText
+      );
+      // TODO: 서버 제출
+      alert("객관식 답안을 제출했습니다! (나중에 API 연동 예정)");
+    }
   };
 
   const handleSendChat = () => {
@@ -185,7 +232,7 @@ export default function BattlePage() {
             {/* 상단 태그 */}
             <div className="loop-question-top">
               <div className="loop-question-tags">
-                <span className="loop-q-badge">Q1</span>
+                <span className="loop-q-badge">Q{currentQuestion.id}</span>
                 <div className="loop-tag-list">
                   <span className="loop-tag-chip">OS 기본</span>
                   <span className="loop-tag-chip">단답형</span>
@@ -197,7 +244,7 @@ export default function BattlePage() {
             <div className="loop-current-meta">
               <span className="loop-current-pill">현재 문제</span>
               <span className="loop-current-index">
-                <span className="loop-current-index-strong">1 / 5</span>  
+                <span className="loop-current-index-strong">1 / 5</span>
               </span>
             </div>
 
@@ -214,39 +261,80 @@ export default function BattlePage() {
               </p>
             </div>
 
-            {/* 답안 입력 */}
             <div className="loop-answer-section">
               <div className="loop-answer-header">
                 <div className="loop-answer-title-wrap">
                   <div className="loop-answer-bar" />
-                  <span className="loop-answer-title">답안 작성</span>
+                  <span className="loop-answer-title">
+                    {currentQuestion.type === "multiple_choice"
+                      ? "정답 선택"
+                      : "답안 작성"}
+                  </span>
                 </div>
                 <span className="loop-answer-tip">
-                  여기서 바로 답안을 작성하면 유리합니다 🔥
+                  {currentQuestion.type === "multiple_choice"
+                    ? "보기 중 하나를 선택하세요 🔥"
+                    : "여기서 바로 답안을 작성하면 유리합니다 🔥"}
                 </span>
               </div>
 
-              <textarea
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                disabled={!isPlaying}
-                className="loop-answer-textarea"
-                placeholder={
-                  isPlaying
-                    ? "여기에 답안을 작성하세요. (코드, 단답, 서술형 등)"
-                    : "배틀 시작 후 답안을 작성할 수 있습니다."
-                }
-              />
+              {currentQuestion.type === "subjective" ? (
+                <>
+                  {/* ✅ 주관식 모드 */}
+                  <textarea
+                    value={answer}
+                    onChange={(e) => setAnswer(e.target.value)}
+                    disabled={!isPlaying}
+                    className="loop-answer-textarea"
+                    placeholder={
+                      isPlaying
+                        ? "여기에 답안을 작성하세요. (코드, 단답, 서술형 등)"
+                        : "배틀 시작 후 답안을 작성할 수 있습니다."
+                    }
+                  />
+                </>
+              ) : (
+                <>
+                  {/* ✅ 객관식 모드 (4지선다 버튼) */}
+                  <div className="loop-option-grid">
+                    {currentQuestion.options?.map((opt, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        disabled={!isPlaying}
+                        className={
+                          "loop-option-btn" +
+                          (selectedOption === idx
+                            ? " loop-option-btn-selected"
+                            : "")
+                        }
+                        onClick={() => setSelectedOption(idx)}
+                      >
+                        <span className="loop-option-prefix">
+                          {String.fromCharCode(65 + idx)}.
+                        </span>
+                        <span className="loop-option-text">{opt}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
 
               <button
                 type="button"
                 onClick={handleSubmitAnswer}
-                disabled={!isPlaying || !answer.trim()}
+                disabled={
+                  !isPlaying ||
+                  (currentQuestion.type === "subjective"
+                    ? !answer.trim()
+                    : selectedOption === null)
+                }
                 className="loop-primary-btn loop-answer-submit"
               >
                 정답 제출
               </button>
             </div>
+
           </div>
         </section>
 
@@ -285,7 +373,8 @@ export default function BattlePage() {
               </span>
             </div>
 
-            <div className="loop-chat-body">
+
+            <div className="loop-chat-body" ref={chatBodyRef}>
               {messages.map((m) => (
                 <div
                   key={m.id}

@@ -858,3 +858,196 @@
 .loop-root.dark-mode .loop-modal-title {
   color: #f9fafb;
 }
+
+/* ===================== */
+/* 객관식 보기 버튼 스타일 */
+/* ===================== */
+
+.loop-option-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-top: 0.25rem;
+}
+
+.loop-option-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 14px;
+  border: 1px solid #e1e6f0;
+  background: #f9fafb;
+  font-size: 0.88rem;
+  color: #111827;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, border-color 0.15s ease,
+    box-shadow 0.15s ease, transform 0.05s ease, color 0.15s ease;
+}
+
+.loop-option-btn:hover:not(:disabled) {
+  background: #edf2ff;
+  border-color: #c7d2fe;
+  box-shadow: 0 6px 14px rgba(148, 163, 184, 0.2);
+  transform: translateY(-1px);
+}
+
+.loop-option-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+  transform: none;
+}
+
+.loop-option-prefix {
+  font-weight: 700;
+  color: var(--loop-primary);
+  font-size: 0.85rem;
+}
+
+.loop-option-text {
+  flex: 1;
+  white-space: normal;
+}
+
+/* 선택된 보기 */
+
+.loop-option-btn-selected {
+  background: var(--loop-primary);
+  border-color: var(--loop-primary-dark);
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgba(79, 93, 255, 0.45);
+}
+
+.loop-option-btn-selected .loop-option-prefix {
+  color: #fffbeb;
+}
+
+/* 다크 모드용 */
+
+.loop-root.dark-mode .loop-option-btn {
+  background: #020617;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.loop-root.dark-mode .loop-option-btn:hover:not(:disabled) {
+  background: #020617;
+  border-color: #374151;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.85);
+}
+
+.loop-root.dark-mode .loop-option-btn-selected {
+  background-image: linear-gradient(135deg, #ffeb70, #ff7bff);
+  border-color: transparent;
+  color: #111827;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.9);
+}
+
+.loop-root.dark-mode .loop-option-btn-selected .loop-option-prefix {
+  color: #111827;
+}
+
+
+/* ===================== */
+/* 객관식 보기 버튼 스타일 */
+/* ===================== */
+
+.loop-option-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-top: 0.25rem;
+}
+
+.loop-option-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1rem 1rem;
+  border-radius: 14px;
+  border: 1px solid #e1e6f0;
+  background: #f9fafb;
+  font-size: 0.88rem;
+  color: #111827;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, border-color 0.15s ease,
+    box-shadow 0.15s ease, transform 0.05s ease, color 0.15s ease;
+
+  /* ✅ 항상 두 줄 높이 정도로 확보 */
+  min-height: 3.4rem; /* 필요하면 3.6~4.0 사이로 조금씩 조절해서 맞추기 */
+}
+
+.loop-option-btn:hover:not(:disabled) {
+  background: #edf2ff;
+  border-color: #c7d2fe;
+  box-shadow: 0 6px 14px rgba(148, 163, 184, 0.2);
+  transform: translateY(-1px);
+}
+
+.loop-option-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+  transform: none;
+}
+
+.loop-option-prefix {
+  font-weight: 700;
+  color: var(--loop-primary);
+  font-size: 0.85rem;
+  margin-top: 0.1rem;
+}
+
+/* ✅ 텍스트는 항상 최대 2줄까지만 보이게 */
+.loop-option-text {
+  flex: 1;
+  white-space: normal;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;         /* 최대 2줄 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;              /* 넘치는 부분은 잘라버림 */
+}
+
+/* 선택된 보기 */
+
+.loop-option-btn-selected {
+  background: var(--loop-primary);
+  border-color: var(--loop-primary-dark);
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgba(79, 93, 255, 0.45);
+}
+
+.loop-option-btn-selected .loop-option-prefix {
+  color: #fffbeb;
+}
+
+/* 다크 모드용 */
+
+.loop-root.dark-mode .loop-option-btn {
+  background: #020617;
+  border-color: #1f2937;
+  color: #e5e7eb;
+}
+
+.loop-root.dark-mode .loop-option-btn:hover:not(:disabled) {
+  background: #020617;
+  border-color: #374151;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.85);
+}
+
+.loop-root.dark-mode .loop-option-btn-selected {
+  background-image: linear-gradient(135deg, #ffeb70, #ff7bff);
+  border-color: transparent;
+  color: #111827;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.9);
+}
+
+.loop-root.dark-mode .loop-option-btn-selected .loop-option-prefix {
+  color: #111827;
+}
