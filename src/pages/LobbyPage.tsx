@@ -281,9 +281,10 @@ const LobbyPage: React.FC = () => {
                 <div className="header-spacer"></div>
 
                 {/* ☀️/🌙 다크 모드 토글 버튼 */}
-                <button className="dark-mode-toggle" onClick={() => setDarkMode(!darkMode)}>
-                    {darkMode ? '☀️' : '🌙'}
+                <button className="theme-toggle-btn-lobby" onClick={() => setDarkMode(!darkMode)}>
+                    {darkMode  ? "☀ Light Mode" : "🌙 Dark Mode"}
                 </button>
+          
 
                 {/* ⭐ 사용자 정보 표시 영역 */}
                 {userInfo.isLoggedIn ? (

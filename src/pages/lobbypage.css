@@ -1,9 +1,12 @@
 /* LobbyPage.css */
 
+/* 공통으로 쓸 메인 파란색 */
+:root {
+  --primary-blue: #2251ff;      /* RANK A0 글자색에 맞춘 파랑 */
+  --primary-blue-dark: #1a3ecc; /* hover용 살짝 더 진한 파랑 */
+}
+
 /* -------------------- 전역 스타일 및 컨테이너 -------------------- */
-/*
-**주의: html, body, #root 스타일은 메인 페이지의 다크 배경을 위해 의도적으로 제거되었습니다.**
-*/
 
 .lobby-container {
   max-width: none;
@@ -11,25 +14,24 @@
   min-height: 100vh;
   margin: 0;
   padding: 30px;
-  /* 로비 페이지만 밝은 배경색을 유지 */
-  background-color: #f4f6f9;
+  background: linear-gradient(180deg, #f9fbff, #edf2ff);
   border-radius: 0;
   box-shadow: none;
-  /* 기본 텍스트 색상을 어두운 색으로 변경 */
-  color: #333333;
+  color: #111827;
   font-family: 'Arial', sans-serif;
   box-sizing: border-box;
-  transition: background-color 0.3s, color 0.3s, background 0.5s ease; /* 그라데이션 전환 애니메이션 추가 */
+  transition: background-color 0.3s, color 0.3s, background 0.5s ease;
 }
 
-/* 🌙 다크 모드 오버라이드: 두 번째 이미지와 유사한 배경 적용 */
 .lobby-container.dark-mode {
-  /* ⭐ 핵심 수정: 어둡고 깊이 있는 남색 계열 그라데이션 */
-  background: linear-gradient(135deg, #22243d, #1a1c30);
-  color: #e0e0e0; /* 밝은 텍스트 */
+  background:
+    radial-gradient(circle at 0% 0%, #141f48 0, transparent 45%),
+    radial-gradient(circle at 100% 0%, #35134d 0, transparent 45%),
+    #050814;
+  color: #f9fbff;
 }
 
-/* -------------------- 헤더 최종 수정 영역 -------------------- */
+/* -------------------- 헤더 -------------------- */
 
 .lobby-header-final {
   display: flex;
@@ -37,39 +39,42 @@
   align-items: center;
   margin-bottom: 30px;
   padding-bottom: 15px;
-  /* 경계선을 밝은 모드에 맞게 연한 회색으로 변경 */
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid #d9e2ff;
 }
 
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .lobby-header-final {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15); /* 밝은 배경에 대비되는 연한 흰색 경계선 */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .header-spacer {
   flex-grow: 1;
 }
 
-/* 나가기 버튼 스타일 (왼쪽) - 파란색 악센트와 통일 */
-.exit-btn {
-  background-color: #4c4ccf; /* 메인 악센트 색상 */
-  color: white; /* 텍스트 흰색 */
-  border: none; /* 경계선 제거 */
+/* 나가기 / 마이페이지 버튼 – 전부 RANK 파랑 */
+
+.exit-btn,
+.mypage-btn {
+  background-color: var(--primary-blue);
+  color: white;
+  border: none;
   padding: 10px 20px;
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
-  transition: background-color 0.2s, border-color 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 마이페이지 버튼과 동일한 그림자 */
+  transition: background-color 0.2s, border-color 0.2s, transform 0.15s ease-out;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.25);
   font-size: 1.2em;
 }
 
-.exit-btn:hover {
-  background-color: #3d3d9f; /* 마이페이지 버튼과 동일한 호버 색상 */
-  border-color: transparent; /* 호버 시 경계선 투명 */
+.exit-btn:hover,
+.mypage-btn:hover {
+  background-color: var(--primary-blue-dark);
+  border-color: transparent;
+  transform: translateY(-1px);
 }
 
-/* ⭐ 사용자 정보 표시 영역 스타일 */
+/* ⭐ 사용자 정보 표시 */
+
 .user-info-display {
   padding: 8px 15px;
   border-radius: 6px;
@@ -79,55 +84,51 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  /* 기본 스타일을 더 부드러운 배경으로 변경 */
-  background-color: #e8e8f5;
-  color: #333333;
+  background-color: #e0e8ff;
+  color: #111827;
   transition: background-color 0.3s, color 0.3s;
 }
 
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .user-info-display {
-  background-color: #333652; 
-  color: #e0e0e0; /* 밝은 텍스트 */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  background-color: #111827;
+  color: #f9fbff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .user-info-display .user-nickname {
-  color: #333333; /* 어두운 텍스트 */
+  color: #111827;
 }
 .lobby-container.dark-mode .user-info-display .user-nickname {
-  color: #ffffff; /* 밝은 텍스트 */
+  color: #ffffff;
 }
-
 
 .user-info-display .user-tier {
   font-style: italic;
   font-weight: normal;
-  color: #555555; /* 약간 더 연한 텍스트 */
+  color: #4b5563;
 }
 .lobby-container.dark-mode .user-info-display .user-tier {
-  color: #aaaaaa; /* 밝은 텍스트 */
+  color: #9ca3af;
 }
 
 .user-info-display.not-logged-in {
-  background-color: #ff8080; /* 눈에 띄는 붉은색 유지 */
+  background-color: #ff8080;
   color: white;
 }
 .lobby-container.dark-mode .user-info-display.not-logged-in {
-  background-color: #a72d2d; /* 더 어두운 붉은색 */
+  background-color: #a72d2d;
 }
 
-/* 티어별 배경색 (A+일 때만 강조) */
 .user-info-display.tier-a\\+ {
-  background-color: #ffe082; /* 연한 노란색/금색 계열 */
-  color: #333333;
+  background-color: #ffe082;
+  color: #111827;
 }
 .user-info-display.tier-a\\+ .user-nickname,
 .user-info-display.tier-a\\+ .user-tier {
-  color: #333333;
+  color: #111827;
 }
 .lobby-container.dark-mode .user-info-display.tier-a\\+ {
-  background-color: #9c6c00; /* 어두운 노란색/금색 계열 */
+  background-color: #9c6c00;
   color: #ffffff;
 }
 .lobby-container.dark-mode .user-info-display.tier-a\\+ .user-nickname,
@@ -135,66 +136,37 @@
   color: #ffffff;
 }
 
-/* 마이페이지 버튼 스타일 (가장 오른쪽) - 메인 악센트와 통일 */
-.mypage-btn {
-  background-color: #4c4ccf; /* 메인 악센트 색상 */
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.mypage-btn:hover {
-  background-color: #3d3d9f;
-}
-
-/* 다크 모드 토글 버튼 스타일 */
-.dark-mode-toggle {
-  background: none;
-  border: none;
-  font-size: 1.5em;
-  cursor: pointer;
-  margin-right: 15px;
-  color: #4c4ccf; /* 기본 색상 */
-  transition: color 0.3s;
-}
-
-.lobby-container.dark-mode .dark-mode-toggle {
-  color: #a3a3ff; /* 다크 모드에서의 색상 */
-}
+/* 다크 모드 토글 아이콘 색 */
 
 
-/* -------------------- 방 만들기 버튼 독립 영역 (아래로 내림) -------------------- */
+/* -------------------- 방 만들기 버튼 -------------------- */
+
 .create-room-area {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 15px;
 }
 
-/* 방 만들기 버튼 - 메인 악센트 색상 */
 .large-create-btn {
-  background-color: #4c4ccf; /* 메인 버튼 강조 */
+  background-color: var(--primary-blue);
   color: white;
   border: none;
   padding: 10px 25px;
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
-  transition: background-color 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.2s, transform 0.15s ease-out;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.3);
   font-size: 1.1em;
 }
 
 .large-create-btn:hover {
-  background-color: #3d3d9f;
+  background-color: var(--primary-blue-dark);
+  transform: translateY(-1px);
 }
 
+/* -------------------- 검색 및 필터 -------------------- */
 
-/* -------------------- 검색 및 필터 영역 (이하 동일) -------------------- */
 .search-filter-area {
   display: flex;
   justify-content: space-between;
@@ -202,25 +174,23 @@
   margin-bottom: 25px;
 }
 
-/* 검색창 스타일 - 밝은 배경에 맞게 조정 */
 .search-input {
   width: 250px;
   padding: 10px 15px;
-  border: 1px solid #dcdcdc;
+  border: 1px solid #d9e2ff;
   border-radius: 6px;
-  background-color: white; /* 흰색 배경 */
-  color: #333333; /* 어두운 텍스트 */
+  background-color: #ffffff;
+  color: #111827;
   margin-right: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
   transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
 
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .search-input {
-  background-color: #333652; 
-  color: #e0e0e0; /* 밝은 텍스트 */
-  border-color: #555577;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  background-color: #111827;
+  color: #e5e7eb;
+  border-color: rgba(148, 163, 184, 0.8);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
 }
 
 .filter-group {
@@ -237,10 +207,9 @@
   align-items: center;
 }
 
-/* 일반 필터 버튼 - 밝은 배경에 맞게 조정 */
 .filter-btn {
-  background-color: #e8e8e8;
-  color: #555555;
+  background-color: #e5e7f5;
+  color: #374151;
   border: none;
   padding: 8px 15px;
   border-radius: 6px;
@@ -248,31 +217,32 @@
   transition: background-color 0.2s, color 0.2s;
 }
 
-/* 🌙 다크 모드 오버라이드 */
-.lobby-container.dark-mode .filter-btn:not(.active) {
-  background-color: #333652;
-  color: #e0e0e0;
-}
-.lobby-container.dark-mode .filter-btn:hover:not(.active) {
-  background-color: #444866; /* 호버 시 색상 강조 */
-}
-
 .filter-btn:hover {
-  background-color: #dcdcdc;
+  background-color: #d4d7f0;
 }
 
-/* 활성화된 필터 버튼 - 메인 악센트 색상 (모드와 관계없이 유지) */
+/* ✅ 활성화된 필터 버튼도 RANK 파랑 */
+
 .filter-btn.active {
-  background-color: #4c4ccf; /* 메인 악센트 색상 */
+  background-color: var(--primary-blue);
   color: white;
   font-weight: bold;
 }
 
-/* 학점 필터 버튼 - 밝은 배경에 맞게 조정 */
+.lobby-container.dark-mode .filter-btn:not(.active) {
+  background-color: #111827;
+  color: #e5e7eb;
+}
+.lobby-container.dark-mode .filter-btn:hover:not(.active) {
+  background-color: #1f2937;
+}
+
+/* 학점 필터 버튼 */
+
 .grade-btn {
-  background-color: #f9f9f9;
-  color: #555555;
-  border: 1px solid #dcdcdc;
+  background-color: #f9fafb;
+  color: #4b5563;
+  border: 1px solid #d9e2ff;
   padding: 6px 10px;
   border-radius: 4px;
   cursor: pointer;
@@ -280,17 +250,20 @@
   transition: background-color 0.2s, color 0.2s, border-color 0.2s;
 }
 
-/* 🌙 다크 모드 오버라이드 */
-.lobby-container.dark-mode .grade-btn:not(.active) {
-  background-color: #282a45; 
-  color: #e0e0e0;
-  border-color: #555577;
-}
-.lobby-container.dark-mode .grade-btn:hover:not(.active) {
-  background-color: #333652;
+.grade-btn:hover:not(.active) {
+  background-color: #e5e7f5;
 }
 
-/* 활성화된 학점 필터 버튼 - 색상 유지 (보라색 계열) */
+.lobby-container.dark-mode .grade-btn:not(.active) {
+  background-color: #111827;
+  color: #e5e7eb;
+  border-color: rgba(148, 163, 184, 0.8);
+}
+.lobby-container.dark-mode .grade-btn:hover:not(.active) {
+  background-color: #1f2937;
+}
+
+/* 활성 학점 버튼은 보라색 유지 */
 .grade-btn.active {
   background-color: #9b59b6;
   color: white;
@@ -298,14 +271,11 @@
   border-color: #8e44ad;
 }
 
-.grade-btn:hover:not(.active) {
-  background-color: #e8e8e8;
-}
+/* 새로고침 버튼 – 파랑 */
 
-/* 새로고침 버튼 - 파란색으로 통일 */
 .refresh-btn {
-  background-color: #4c4ccf; /* 파란색으로 변경 */
-  color: white; /* 텍스트 흰색 */
+  background-color: var(--primary-blue);
+  color: white;
   border: none;
   padding: 8px 15px;
   border-radius: 6px;
@@ -313,87 +283,76 @@
   font-weight: bold;
   align-self: flex-start;
   margin-top: 10px;
-  transition: background-color 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 통일된 그림자 */
+  transition: background-color 0.2s, transform 0.15s ease-out;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.25);
 }
 
 .refresh-btn:hover {
-  background-color: #3d3d9f; /* 파란색 호버 */
+  background-color: var(--primary-blue-dark);
+  transform: translateY(-1px);
 }
 
+/* -------------------- 방 목록 -------------------- */
 
-/* -------------------- 방 목록 (Room List) -------------------- */
 .room-list-container {
-  /* 흰색 배경 */
-  background-color: white;
-  border-radius: 8px;
+  background-color: #ffffff;
+  border-radius: 16px;
   padding: 15px;
   max-height: 60vh;
   overflow-y: auto;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* 은은한 그림자 */
-  border: 1px solid #e0e0e0;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+  border: 1px solid #d9e2ff;
   transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .room-list-container {
-  background-color: #282a45; 
-  border-color: #555577;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8); /* 그림자 진하게 */
+  background-color: #080c20;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.9);
 }
 
-/* 스크롤바 스타일링 - 밝은 배경에 맞게 조정 */
 .room-list-container::-webkit-scrollbar {
   width: 8px;
 }
 .room-list-container::-webkit-scrollbar-thumb {
-  background: #cccccc;
+  background: #cbd5f5;
   border-radius: 10px;
 }
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .room-list-container::-webkit-scrollbar-thumb {
-  background: #777799;
+  background: #4b5563;
 }
 
-/* 방 목록 아이템 - 밝은 배경에 맞게 조정 */
 .room-item {
   display: flex;
   align-items: center;
   padding: 15px;
   margin-bottom: 10px;
-  background-color: #f7f7f7; /* 연한 회색 배경 */
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.2s, color 0.2s;
-}
-
-/* 🌙 다크 모드 오버라이드 */
-.lobby-container.dark-mode .room-item {
-  background-color: #333652; 
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  background-color: #eef2ff;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+  transition: background-color 0.2s, color 0.2s, transform 0.15s ease-out;
 }
 
 .room-item:hover {
-  background-color: #eeeeee;
+  background-color: #e0e7ff;
+  transform: translateY(-1px);
 }
-/* 🌙 다크 모드 오버라이드 */
+
+.lobby-container.dark-mode .room-item {
+  background-color: #111827;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
 .lobby-container.dark-mode .room-item:hover {
-  background-color: #444866;
+  background-color: #1f2937;
 }
 
-/* 진행 중인 방 - 약간 어둡고 덜 눈에 띄게 */
 .room-item.playing {
-  background-color: #f0e6e6; /* 연한 붉은색 계열 */
-  opacity: 1;
+  background-color: #ffe4e4;
 }
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .room-item.playing {
-  background-color: #503d3d; /* 더 어두운 붉은색 계열 */
-  opacity: 1;
+  background-color: #3b1f2b;
 }
 
-
-/* 방 타입 태그 (코테/미니) - 색상 유지 */
 .room-type-tag {
   padding: 5px 10px;
   border-radius: 4px;
@@ -405,31 +364,21 @@
   color: white;
 }
 
-.room-type-tag.cote {
-  background-color: #e74c3c;
-}
+.room-type-tag.cote { background-color: #e74c3c; }
+.room-type-tag.mini { background-color: #2ecc71; }
 
-.room-type-tag.mini {
-  background-color: #2ecc71;
-}
-
-.room-details {
-  flex-grow: 1;
-}
+.room-details { flex-grow: 1; }
 
 .room-title {
   font-size: 1.1em;
   font-weight: bold;
   margin-bottom: 4px;
-  color: #333333;
+  color: #111827;
 }
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .room-title {
-  color: #f0f0f0;
+  color: #f9fbff;
 }
 
-
-/* 학점 티어 정보 스타일링 - 색상 유지 */
 .room-tier-info {
   font-size: 0.9em;
   font-weight: bold;
@@ -441,7 +390,6 @@
 .room-tier-info.c\\+ { color: #e67e22; }
 .room-tier-info.c0 { color: #e74c3c; }
 
-/* 상태 및 액션 영역 */
 .room-status-actions {
   display: flex;
   align-items: center;
@@ -457,112 +405,101 @@
 
 .room-privacy {
   font-size: 0.9em;
-  color: #777777; /* 어두운 텍스트 */
+  color: #6b7280;
 }
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .room-privacy {
-  color: #aaaaaa;
+  color: #9ca3af;
 }
-
 
 .room-players {
   font-size: 1em;
   font-weight: bold;
-  color: #555555;
+  color: #374151;
 }
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .room-players {
-  color: #cccccc;
+  color: #e5e7eb;
 }
 
-.room-players.full {
-  color: #e74c3c;
-}
+.room-players.full { color: #e74c3c; }
 
-/* 입장 버튼 - 파란색으로 통일 */
+/* 입장 버튼 – 파랑 */
+
 .action-btn.enter {
-  background-color: #4c4ccf; /* 파란색으로 변경 */
-  color: white; /* 텍스트 흰색 */
-  border: none; /* 경계선 제거 */
+  background-color: var(--primary-blue);
+  color: white;
+  border: none;
   padding: 8px 18px;
   border-radius: 4px;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, transform 0.15s ease-out;
   min-width: 80px;
 }
 
 .action-btn.enter:hover:not(:disabled) {
-  background-color: #3d3d9f; /* 파란색 호버 */
+  background-color: var(--primary-blue-dark);
+  transform: translateY(-1px);
 }
 
-/* 비활성화 버튼 - 밝은 배경에 맞게 조정 */
-.action-btn.disabled, .action-btn.in-progress {
-  background-color: #cccccc;
-  color: #777777;
+.action-btn.disabled,
+.action-btn.in-progress {
+  background-color: #e5e7eb;
+  color: #9ca3af;
   cursor: not-allowed;
 }
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .action-btn.disabled,
 .lobby-container.dark-mode .action-btn.in-progress {
-  background-color: #777799;
-  color: #aaaaaa;
+  background-color: #4b5563;
+  color: #d1d5db;
 }
 
 .private-room-guide {
   margin-top: 15px;
   font-size: 0.9em;
-  color: #999999;
+  color: #9ca3af;
   text-align: right;
   font-style: italic;
 }
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .private-room-guide {
-  color: #aaaaaa;
+  color: #d1d5db;
 }
 
+/* -------------------- 모달 -------------------- */
 
-/* -------------------- 모달 스타일 -------------------- */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  /* 배경을 약간 밝게 조정 */
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.55);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
 
-/* 방 만들기 모달 - 밝은 배경으로 변경 */
 .create-room-modal {
-  background-color: white;
+  background-color: #ffffff;
   padding: 30px;
-  border-radius: 10px;
+  border-radius: 16px;
   width: 450px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 5px 20px rgba(15, 23, 42, 0.25);
   transition: background-color 0.3s, color 0.3s;
 }
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .create-room-modal {
-  background-color: #282a45; 
+  background-color: #080c20;
 }
 
-
 .create-room-modal h2 {
-  color: #333333;
+  color: #111827;
   font-size: 1.5em;
   margin-bottom: 25px;
   padding-bottom: 10px;
-  /* 경계선을 밝은 모드에 맞게 연한 회색으로 변경 */
-  border-bottom: 1px solid #dcdcdc;
+  border-bottom: 1px solid #d9e2ff;
 }
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .create-room-modal h2 {
-  color: #f0f0f0;
+  color: #f9fbff;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -571,30 +508,26 @@
   margin-top: 15px;
   margin-bottom: 5px;
   font-weight: bold;
-  color: #555555;
+  color: #374151;
 }
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .modal-content-area label.input-label {
-  color: #aaaaaa;
+  color: #e5e7eb;
 }
 
-
-/* 입력 필드 - 밝은 배경에 맞게 조정 */
 .input-field {
   width: 100%;
   padding: 10px;
   margin-bottom: 10px;
-  border: 1px solid #cccccc;
+  border: 1px solid #d9e2ff;
   border-radius: 5px;
-  background-color: #f9f9f9;
-  color: #333333;
+  background-color: #f9fafb;
+  color: #111827;
   transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .input-field {
-  background-color: #333652; 
-  color: #f0f0f0;
-  border-color: #555577;
+  background-color: #111827;
+  color: #f9fbff;
+  border-color: rgba(148, 163, 184, 0.8);
 }
 
 .type-selector {
@@ -603,32 +536,30 @@
   margin-bottom: 15px;
 }
 
-/* 타입 버튼 - 밝은 배경에 맞게 조정 */
 .type-btn {
   flex-grow: 1;
   padding: 10px;
   border: none;
   border-radius: 6px;
-  background-color: #e8e8e8;
-  color: #555555;
+  background-color: #e5e7f5;
+  color: #374151;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .type-btn:hover {
-  background-color: #dcdcdc;
+  background-color: #d4d7f0;
 }
 
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .type-btn:not(.active) {
-  background-color: #333652; 
-  color: #e0e0e0;
+  background-color: #111827;
+  color: #e5e7eb;
 }
 .lobby-container.dark-mode .type-btn:hover:not(.active) {
-  background-color: #444866;
+  background-color: #1f2937;
 }
 
-/* 활성화된 타입 버튼 - 보라색 계열 유지 */
+/* 활성 타입 버튼은 그대로 보라색 */
 .type-btn.active {
   background-color: #9b59b6;
   color: white;
@@ -654,10 +585,8 @@
   justify-content: flex-end;
   gap: 15px;
   padding-top: 15px;
-  /* 경계선을 밝은 모드에 맞게 연한 회색으로 변경 */
-  border-top: 1px solid #dcdcdc;
+  border-top: 1px solid #d9e2ff;
 }
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .modal-actions {
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -670,7 +599,7 @@
   cursor: pointer;
 }
 
-/* 생성 버튼 - 초록색 계열 유지 */
+/* 생성 / 취소 버튼 색은 그대로 (초록/빨강) */
 .create-btn {
   background-color: #2ecc71;
   color: white;
@@ -679,8 +608,6 @@
   background-color: #27ae60;
 }
 
-
-/* 취소 버튼 - 붉은색 계열 유지 */
 .cancel-btn {
   background-color: #e74c3c;
   color: white;
@@ -689,8 +616,8 @@
   background-color: #c0392b;
 }
 
+/* 토글 스위치 */
 
-/* 토글 스위치 (밝은 모드에 맞게 조정) */
 .toggle-switch {
   position: relative;
   display: inline-block;
@@ -711,14 +638,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
+  background-color: #cbd5f5;
+  transition: 0.4s;
   border-radius: 24px;
 }
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .slider:not(input:checked + .slider) {
-  background-color: #666;
+  background-color: #4b5563;
 }
 
 .slider:before {
@@ -729,62 +654,74 @@
   left: 4px;
   bottom: 4px;
   background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
+  transition: 0.4s;
   border-radius: 50%;
 }
 
 input:checked + .slider {
-  /* 이미지의 파란색 계열에 가깝게 */
-  background-color: #4c4ccf;
+  background-color: var(--primary-blue);
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px #4c4ccf;
+  box-shadow: 0 0 1px var(--primary-blue);
 }
 
 input:checked + .slider:before {
-  -webkit-transform: translateX(16px);
-  -ms-transform: translateX(16px);
   transform: translateX(16px);
 }
 
-/* 비밀번호 입력 모달 스타일 - 밝은 배경으로 변경 */
+/* 비밀번호 모달 */
+
 .password-modal {
-  background-color: white;
+  background-color: #ffffff;
   padding: 30px;
-  border-radius: 10px;
+  border-radius: 16px;
   width: 350px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 5px 20px rgba(15, 23, 42, 0.25);
   text-align: left;
   transition: background-color 0.3s, color 0.3s;
 }
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .password-modal {
-  background-color: #282a45; 
+  background-color: #080c20;
 }
 
 .password-modal h2 {
-  color: #333333;
+  color: #111827;
   font-size: 1.5em;
   margin-bottom: 15px;
   padding-bottom: 10px;
-  border-bottom: 1px solid #dcdcdc;
+  border-bottom: 1px solid #d9e2ff;
   text-align: center;
 }
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .password-modal h2 {
-  color: #f0f0f0;
+  color: #f9fbff;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .room-title-display {
-  color: #777777;
+  color: #6b7280;
   margin-bottom: 20px;
   font-size: 0.9em;
   text-align: center;
 }
-/* 🌙 다크 모드 오버라이드 */
 .lobby-container.dark-mode .room-title-display {
-  color: #aaaaaa;
+  color: #d1d5db;
+}
+.theme-toggle-btn-lobby {
+  position: absolute;
+  right: 360px;
+  top: 37px;
+  z-index: 2;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(15, 23, 42, 0.6);
+  color: #f9fafb;
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.16s ease-out;
 }
