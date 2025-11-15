@@ -1,0 +1,234 @@
+/* src/pages/LobbyPage.css */
+
+.lobby-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #f4f7f6;
+  border-radius: 8px;
+  font-family: Arial, sans-serif;
+  border: 1px solid #ddd;
+  color: #333; /* 👈 [수정] 전체 텍스트의 기본 색상을 검정색으로 지정 */
+}
+
+.lobby-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+}
+
+.lobby-header h1 {
+  font-size: 24px;
+  color: #333; /* 👈 [확인] 제목 색상 */
+  margin: 0;
+}
+
+.create-room-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.create-room-btn:hover {
+  background-color: #0056b3;
+}
+
+.lobby-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.search-bar {
+  width: 40%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  color: #333; /* 👈 [수정] 검색창 텍스트 색상 */
+}
+
+.filter-buttons button {
+  padding: 10px 15px;
+  margin-left: 5px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  cursor: pointer;
+  border-radius: 5px;
+  color: #333; /* 👈 [수정] 필터 버튼 텍스트 색상 */
+}
+.filter-buttons button.active {
+  background-color: #007bff;
+  color: white; /* 활성화된 버튼은 흰색으로 유지 */
+  border-color: #007bff;
+}
+
+.room-list-container {
+  border: 1px solid #eee;
+  border-radius: 5px;
+  background-color: #fff;
+  min-height: 400px;
+  overflow-y: auto;
+}
+
+.room-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+}
+.room-item:last-child {
+  border-bottom: none;
+}
+
+.room-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.room-type {
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: white; /* 👈 타입 뱃지 내부 글씨는 흰색 유지 */
+  font-weight: bold;
+  font-size: 14px;
+}
+.type-code { background-color: #6f42c1; } /* 코테: 보라색 */
+.type-mini { background-color: #28a745; } /* 미니: 초록색 */
+
+.lock-icon {
+  margin-right: 5px;
+  color: #d9534f;
+}
+
+.room-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: #333; /* 👈 [수정] 방 제목 텍스트 색상 */
+}
+
+.room-host {
+  font-size: 14px;
+  color: #555;
+}
+
+.room-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.room-status {
+  font-size: 14px;
+  color: #777;
+}
+
+.join-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.join-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* --- 모달 (팝업) 스타일 --- */
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  width: 400px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.modal-content h2 {
+  color: #333; /* 👈 [수정] 모달 제목 텍스트 색상 */
+  margin-top: 0;
+}
+
+.modal-content label {
+  color: #333; /* 👈 [수정] 모달 라벨 텍스트 색상 */
+  display: block;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  color: #333; /* 👈 [수정] 입력창 텍스트 색상 */
+}
+
+.type-select {
+  display: flex;
+  gap: 10px;
+}
+.type-select button {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  color: #333; /* 👈 [수정] 모달 버튼 텍스트 색상 */
+}
+.type-select button.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.private-check {
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  color: #333; /* 👈 [수정] 체크박스 옆 텍스트 색상 */
+}
+.private-check input {
+  margin-right: 10px;
+}
+
+.modal-buttons {
+  margin-top: 25px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.modal-buttons button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.modal-buttons .confirm-btn {
+  background-color: #007bff;
+  color: white;
+}
