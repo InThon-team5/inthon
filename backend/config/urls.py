@@ -24,6 +24,8 @@ urlpatterns = [
     # /api/profile/ (프로필 관련)
     # /api/titles/, /api/tech-stacks/, /api/clubs/ (참조 데이터)
     path('api/', include('users.urls')),
+    # /api/types/, /api/subjects/, /api/problems/ (문제 관련)
+    path('api/', include('problems.urls')),
     # POST /api/token/refresh/ (Access Token 재발급)
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
