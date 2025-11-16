@@ -150,17 +150,19 @@ def verify_password(request, room_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def join_room(request, room_id):
-    """대결방 입장 (게스트 입장)"""
+    """대결방 입장 (호스트 또는 게스트 입장)"""
     room = get_object_or_404(BattleRoom, id=room_id)
     user = request.user
     
-    # 호스트는 입장할 수 없음
+    # 호스트가 자신이 만든 방에 입장하는 경우 허용
     if room.host == user:
+        # 호스트는 이미 방을 소유하고 있으므로 그냥 입장 성공
         return Response(
-            {'error': '호스트는 입장할 수 없습니다.'},
-            status=status.HTTP_400_BAD_REQUEST
+            {'success': True, 'message': '대결방에 입장했습니다.'},
+            status=status.HTTP_200_OK
         )
     
+    # 다른 사람이 파놓은 방에 입장하는 경우 (게스트 입장)
     # 비공개 방인 경우 비밀번호 확인
     if room.is_private:
         password = request.data.get('password')
