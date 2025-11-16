@@ -884,10 +884,11 @@ export default function BattlePage() {
               className="loop-primary-btn loop-modal-single-btn"
               onClick={() => {
                 setBattleResult(null);
-                if (isSurrender) {
-                  // 서렌으로 진 경우에는 확인 누르면 로비로 이동
-                  window.history.back();
-                }
+                setStage("finished");
+
+                
+                navigate("/lobby");
+        
               }}
             >
               확인
