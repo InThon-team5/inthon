@@ -58,23 +58,23 @@ class BattleRoomListCreateView(generics.ListCreateAPIView):
         return queryset
     
     def create(self, request, *args, **kwargs):
-        """대결방 생성 전 검증: 이미 활성 대결방이 있는지 확인"""
+        """대결방 생성 전 검증: 이미 '대기' 상태인 대결방이 있는지 확인"""
         user = request.user
         
         # 현재 사용자가 호스트인 대결방 조회
         existing_rooms = BattleRoom.objects.filter(host=user).select_related('status')
         
-        # 종료 상태가 아닌 대결방이 있는지 확인
-        # 상태는 '대기', '진행', '종료' 3개만 존재
-        active_rooms = existing_rooms.exclude(
-            status__name='종료'
+        # '대기' 상태인 대결방이 있는지 확인
+        # '진행' 상태인 방이 있어도 새로 생성 가능
+        waiting_rooms = existing_rooms.filter(
+            status__name='대기'
         )
         
-        if active_rooms.exists():
+        if waiting_rooms.exists():
             return Response(
                 {
-                    'error': '이미 활성화된 대결방이 있습니다. 대결방을 삭제하거나 종료 상태로 변경한 후 새로 생성할 수 있습니다.',
-                    'existing_room_id': active_rooms.first().id
+                    'error': '이미 대기 중인 대결방이 있습니다. 대결방을 삭제하거나 종료 상태로 변경한 후 새로 생성할 수 있습니다.',
+                    'existing_room_id': waiting_rooms.first().id
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
