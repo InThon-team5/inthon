@@ -1,6 +1,6 @@
 // src/pages/MyPage.tsx
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./Mypage.css";
+import "./MyPage.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../ThemeProvider";
