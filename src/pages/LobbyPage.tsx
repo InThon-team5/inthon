@@ -1,7 +1,7 @@
 // src/pages/LobbyPage.tsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./LobbyPage.css";
+import "./lobbypage.css";
 import { useTheme } from "../ThemeProvider";
 import {
   fetchBattleRooms,
