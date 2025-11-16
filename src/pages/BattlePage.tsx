@@ -1,11 +1,9 @@
 // src/pages/BattlePage.tsx
-import { useParams, useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { BattleIntroOverlay } from "../components/BattleIntroOverlay";
 import "./BattlePage.css";
 import { useTheme } from "../ThemeProvider";
-const [roomStatus, setRoomStatus] = useState<string | null>(null);
-
 import {
   fetchBattleDetail,
   type BattleQuestionDto,
@@ -47,6 +45,7 @@ export default function BattlePage() {
 
   const numericRoomId = roomId ? Number(roomId) : NaN;
 
+  const [roomStatus, setRoomStatus] = useState<string | null>(null);
 
   // 1. 서버에서 받아올 기본 정보들
   const [battleMode, setBattleMode] = useState<BattleMode>("mini");
