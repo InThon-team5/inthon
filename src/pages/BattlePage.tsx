@@ -830,7 +830,7 @@ export default function BattlePage() {
                 setBattleResult(null);
 
                 // 🔥 메인 화면으로 이동 (원하면 "/lobby" 등으로 바꿔도 됨)
-                navigate("/");
+                navigate("/lobby");
               }}
             >
               확인
