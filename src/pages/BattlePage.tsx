@@ -80,6 +80,7 @@ export default function BattlePage() {
     "win" | "lose" | "draw" | null
   >(null);
 
+  const [isSurrender, setIsSurrender] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([
     { id: 1, sender: "opponent", text: "GLHF 👋" },
@@ -406,9 +407,35 @@ export default function BattlePage() {
     setShowExitModal(true);
   };
 
-  const handleConfirmExit = () => {
+  const handleConfirmExit = async () => {
+    // 나가기 확인 모달은 닫고
     setShowExitModal(false);
-    window.history.back();
+
+    // 🔥 이 나가기는 '서렌(기권)'이다 라는 플래그
+    setIsSurrender(true);
+
+    // 바로 이 클라이언트에서는 패배 처리
+    setStage("finished");
+    setIsFinalSubmitted(true);
+    setBattleResult("lose");
+
+    // 방 ID 없으면 서버에는 더 이상 보낼 수 없음
+    if (!numericRoomId || Number.isNaN(numericRoomId)) {
+      console.warn("roomId 없음, 서렌 결과를 서버에 보낼 수 없습니다.");
+      return;
+    }
+
+    try {
+      // 남은 시간 0%, 정답률 0% 같은 최악의 값으로 제출 → 서버 기준 패배 확정
+      await submitBattleResult(numericRoomId, {
+        remaining_time_percent: 0,
+        accuracy_percent: 0,
+      });
+      // 상대방 쪽은 서버에서 이 사람을 '완료 + 최악 스코어'로 기록해두고,
+      // 상대가 정상 제출하면 서버 응답에서 상대 쪽에 win을 내려줌
+    } catch (e) {
+      console.error("서렌 결과 전송 중 오류:", e);
+    }
   };
 
   // 7. 로딩/에러 처리
@@ -797,13 +824,21 @@ export default function BattlePage() {
             <button
               type="button"
               className="loop-primary-btn loop-modal-single-btn"
-              onClick={() => setBattleResult(null)}
+              onClick={() => {
+                setBattleResult(null);
+                if (isSurrender) {
+                  // 서렌으로 진 경우에는 확인 누르면 로비로 이동
+                  window.history.back();
+                }
+              }}
             >
               확인
             </button>
           </div>
         </div>
       )}
+
+
 
       {/* 나가기 확인 모달 */}
       {showExitModal && (
