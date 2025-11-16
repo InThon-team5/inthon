@@ -182,12 +182,15 @@ def join_room(request, room_id):
             status=status.HTTP_400_BAD_REQUEST
         )
     
-    # 게스트 설정 (없는 경우에만)
     if not room.guest:
         room.guest = user
+
+        playing_status = BattleStatus.objects.filter(name='진행').first()
+        if playing_status:
+            room.status = playing_status
+
         room.save()
-    
-    # 입장 성공
+
     return Response(
         {'success': True, 'message': '대결방에 입장했습니다.'},
         status=status.HTTP_200_OK

@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import { BattleIntroOverlay } from "../components/BattleIntroOverlay";
 import "./BattlePage.css";
 import { useTheme } from "../ThemeProvider";
+const [roomStatus, setRoomStatus] = useState<string | null>(null);
+
 import {
   fetchBattleDetail,
   type BattleQuestionDto,
@@ -102,6 +104,23 @@ export default function BattlePage() {
       ? 0
       : (opponentSolved / TOTAL_QUESTIONS) * 100;
 
+  useEffect(() => {
+    if (!numericRoomId || Number.isNaN(numericRoomId)) return;
+    if (roomStatus !== "대기") return; // 대기 상태일 때만 폴링
+
+    const interval = setInterval(async () => {
+      try {
+        const data = await fetchBattleDetail(numericRoomId);
+        setRoomStatus(data.status?.name ?? null);
+      } catch (e) {
+        console.error("방 상태 폴링 중 오류:", e);
+      }
+    }, 3000); // 3초마다
+
+    return () => clearInterval(interval);
+  }, [numericRoomId, roomStatus]);
+
+
   // 3. 배틀 정보 로딩
   useEffect(() => {
     if (!roomId) {
@@ -137,6 +156,8 @@ export default function BattlePage() {
         setMyNickname("나");
         setEnemyNickname(data.host.email ?? "상대");
 
+        setRoomStatus(data.status?.name ?? null);
+
         // 문제 매핑 (description 안의 1.~, 2.~를 option으로 뽑아도 되고, 일단 그대로 둠)
         const mappedQuestions: Question[] = data.problems.map((p) => ({
           id: p.id,
@@ -149,6 +170,7 @@ export default function BattlePage() {
             .map((line) => line.replace(/^\s*\d+\.\s*/, "").trim())
             .filter((line) => line.length > 0),
         }));
+
 
         setQuestions(mappedQuestions);
         setCurrentIndex(0);
@@ -203,9 +225,12 @@ export default function BattlePage() {
     if (stage !== "waiting") return;
     if (loading || loadError || !currentQuestion) return;
 
+    // ✅ 아직 '대기' 상태이면 시작하지 않음
+    if (roomStatus !== "진행") return;
+
     const id = setTimeout(() => setStage("intro"), 1200);
     return () => clearTimeout(id);
-  }, [stage, loading, loadError, currentQuestion]);
+  }, [stage, loading, loadError, currentQuestion, roomStatus]);
 
   // playing 시작 시 타이머 리셋
   useEffect(() => {
@@ -239,7 +264,7 @@ export default function BattlePage() {
       setStage("finished");
       setShowTimeUpModal(true);
     }
-  }, [secondsLeft, isPlaying, battleMode, isFinalSubmitted]); 
+  }, [secondsLeft, isPlaying, battleMode, isFinalSubmitted]);
 
   // 채팅 auto-scroll
   useEffect(() => {
@@ -762,8 +787,8 @@ export default function BattlePage() {
               {battleResult === "win"
                 ? "승리! 🏆"
                 : battleResult === "lose"
-                ? "패배… 😢"
-                : "무승부 🤝"}
+                  ? "패배… 😢"
+                  : "무승부 🤝"}
             </h2>
             <p className="loop-modal-text">
               {battleMode === "cote"

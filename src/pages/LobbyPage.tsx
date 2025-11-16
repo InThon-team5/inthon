@@ -414,8 +414,22 @@ const LobbyPage: React.FC = () => {
       };
 
       const newRoom = await createBattleRoom(payload);
-      setRooms((prev) => [newRoom, ...prev]);
+
+      // 기존: 로비 리스트만 갱신
+      // setRooms((prev) => [newRoom, ...prev]);
+      // setIsModalOpen(false);
+
+      // ✅ 1) 모달 닫고
       setIsModalOpen(false);
+
+      // ✅ 2) 로비 리스트에는 알아서 새로고침 버튼으로 다시 불러오게 두고
+      //     (원하면 setRooms 유지해도 상관 없음)
+      setRooms((prev) => [newRoom, ...prev]);
+
+      // ✅ 3) 방 만든 사람을 바로 해당 배틀 페이지로 보내기
+      navigate(`/battle/${newRoom.id}`, {
+        state: { roomId: newRoom.id },
+      });
     } catch (e) {
       console.error(e);
       alert("대결 방 생성에 실패했습니다.");
