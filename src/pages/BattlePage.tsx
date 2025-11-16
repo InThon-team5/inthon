@@ -1,5 +1,5 @@
 // src/pages/BattlePage.tsx
-import { useParams } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import { BattleIntroOverlay } from "../components/BattleIntroOverlay";
 import "./BattlePage.css";
@@ -43,6 +43,7 @@ type MiniAnswer = {
 export default function BattlePage() {
   const { roomId } = useParams<{ roomId: string }>();
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();   // 🔥 추가
 
   const numericRoomId = roomId ? Number(roomId) : NaN;
 
@@ -405,6 +406,8 @@ export default function BattlePage() {
   };
 
   const handleServerResult = (result: "win" | "lose" | "draw") => {
+    setStage("finished");
+    setIsFinalSubmitted(true);
     setBattleResult(result);
     setShowWaitOpponentModal(false);
     setShowTimeUpModal(false);
@@ -413,7 +416,7 @@ export default function BattlePage() {
   // 결과 폴링 함수
   const startResultPolling = () => {
     if (!numericRoomId || Number.isNaN(numericRoomId)) return;
-    
+
     // 이미 폴링 중이면 중복 시작 방지
     if (pollingIntervalRef.current) {
       return;
@@ -422,7 +425,7 @@ export default function BattlePage() {
     pollingIntervalRef.current = setInterval(async () => {
       try {
         const result = await getBattleResult(numericRoomId);
-        
+
         if (result.is_complete) {
           // 둘 다 제출 완료 - 결과 표시
           if (pollingIntervalRef.current) {
@@ -821,7 +824,14 @@ export default function BattlePage() {
             <button
               type="button"
               className="loop-primary-btn loop-modal-single-btn"
-              onClick={() => setShowTimeUpModal(false)}
+              onClick={() => {
+                // 🔥 혹시 모를 상황 대비해서 한 번 더 종료 상태로
+                setStage("finished");
+                setBattleResult(null);
+
+                // 🔥 메인 화면으로 이동 (원하면 "/lobby" 등으로 바꿔도 됨)
+                navigate("/");
+              }}
             >
               확인
             </button>
