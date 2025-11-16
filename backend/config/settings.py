@@ -173,4 +173,4 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*', '.pythonanywhere.com']
 
-CORS_ALLOWED_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = True
