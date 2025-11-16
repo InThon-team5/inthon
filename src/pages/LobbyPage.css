@@ -383,11 +383,11 @@
   font-size: 0.9em;
   font-weight: bold;
 }
-.room-tier-info.a\\+ { color: #f1c40f; }
+.room-tier-info.a-plus { color: #f1c40f; }
 .room-tier-info.a0 { color: #2ecc71; }
-.room-tier-info.b\\+ { color: #3498db; }
+.room-tier-info.b-plus { color: #3498db; }
 .room-tier-info.b0 { color: #9b59b6; }
-.room-tier-info.c\\+ { color: #e67e22; }
+.room-tier-info.c-plus { color: #e67e22; }
 .room-tier-info.c0 { color: #e74c3c; }
 
 .room-status-actions {
