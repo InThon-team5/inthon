@@ -10,6 +10,7 @@ import {
 } from "./services/battleApi";
 import {
   submitBattleResult,
+  getBattleResult,
   type SubmitResultResponse,
 } from "./services/battleRoomApi";
 
@@ -94,6 +95,9 @@ export default function BattlePage() {
 
   const [showTimeUpModal, setShowTimeUpModal] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
+
+  // 폴링 중복 방지를 위한 ref
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const currentQuestion = questions[currentIndex];
   const isPlaying = stage === "playing";
@@ -273,6 +277,16 @@ export default function BattlePage() {
     el.scrollTop = el.scrollHeight;
   }, [messages]);
 
+  // 컴포넌트 언마운트 시 폴링 정리
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+  }, []);
+
   // 6. 핸들러들
 
   const saveCurrentAnswerToState = () => {
@@ -377,6 +391,8 @@ export default function BattlePage() {
         handleServerResult(finalResult);
       } else {
         setShowWaitOpponentModal(true);
+        // 상대방이 제출할 때까지 폴링 시작
+        startResultPolling();
       }
     } catch (e) {
       console.error(e);
@@ -392,6 +408,38 @@ export default function BattlePage() {
     setBattleResult(result);
     setShowWaitOpponentModal(false);
     setShowTimeUpModal(false);
+  };
+
+  // 결과 폴링 함수
+  const startResultPolling = () => {
+    if (!numericRoomId || Number.isNaN(numericRoomId)) return;
+    
+    // 이미 폴링 중이면 중복 시작 방지
+    if (pollingIntervalRef.current) {
+      return;
+    }
+
+    pollingIntervalRef.current = setInterval(async () => {
+      try {
+        const result = await getBattleResult(numericRoomId);
+        
+        if (result.is_complete) {
+          // 둘 다 제출 완료 - 결과 표시
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
+          }
+          const finalResult =
+            (result.my_result_status as "win" | "lose" | "draw" | undefined) ??
+            (result.my_result?.result as "win" | "lose" | "draw" | undefined) ??
+            "draw";
+          handleServerResult(finalResult);
+        }
+      } catch (e) {
+        console.error("결과 폴링 중 오류:", e);
+        // 오류가 발생해도 계속 폴링 (네트워크 오류 등일 수 있음)
+      }
+    }, 2000); // 2초마다 확인
   };
 
   const handleSendChat = () => {

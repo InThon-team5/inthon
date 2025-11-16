@@ -388,8 +388,29 @@ def get_battle_result(request, room_id):
         'is_complete': my_result is not None and opponent_result is not None
     }
     
-    # 둘 다 제출한 경우 최종 승패 결과 포함
+    # 둘 다 제출한 경우 승패 판단
     if my_result and opponent_result:
+        # 아직 승패가 결정되지 않은 경우 판단
+        if not my_result.result or not opponent_result.result:
+            my_score = my_result.total_score
+            opponent_score = opponent_result.total_score
+            
+            if my_score > opponent_score:
+                # 현재 사용자 승리
+                my_result.result = 'win'
+                opponent_result.result = 'lose'
+            elif my_score < opponent_score:
+                # 현재 사용자 패배
+                my_result.result = 'lose'
+                opponent_result.result = 'win'
+            else:
+                # 동점 (무승부)
+                my_result.result = 'draw'
+                opponent_result.result = 'draw'
+            
+            my_result.save()
+            opponent_result.save()
+        
         response_data['my_result_status'] = my_result.result
         response_data['opponent_result_status'] = opponent_result.result
     

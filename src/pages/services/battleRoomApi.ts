@@ -250,3 +250,52 @@ export async function submitBattleResult(
   return (await res.json()) as SubmitResultResponse;
 }
 
+// 결과 조회 (get-result)
+//   GET /api/battles/rooms/{room_id}/result/
+export type GetResultResponse = {
+  message?: string;
+  my_result: {
+    id: number;
+    user: { id: number; email: string };
+    remaining_time_percent: number;
+    accuracy_percent: number;
+    total_score: number;
+    result: "win" | "lose" | "draw" | null;
+    submitted_at: string;
+  } | null;
+  opponent_result: {
+    id: number;
+    user: { id: number; email: string };
+    remaining_time_percent: number;
+    accuracy_percent: number;
+    total_score: number;
+    result: "win" | "lose" | "draw" | null;
+    submitted_at: string;
+  } | null;
+  is_complete: boolean;
+  my_result_status?: "win" | "lose" | "draw";
+  opponent_result_status?: "win" | "lose" | "draw";
+  result?: "win" | "lose" | "draw";
+};
+
+export async function getBattleResult(
+  roomId: number
+): Promise<GetResultResponse> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/battles/rooms/${roomId}/result/`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error("결과 조회에 실패했습니다.");
+  }
+
+  return (await res.json()) as GetResultResponse;
+}
+
