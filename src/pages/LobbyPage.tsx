@@ -125,11 +125,11 @@ const CreateRoomModal: React.FC<CreateRoomModalProps> = ({
       problemsInput.trim().length === 0
         ? []
         : problemsInput
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean)
-            .map((s) => Number(s))
-            .filter((n) => !Number.isNaN(n));
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .map((s) => Number(s))
+          .filter((n) => !Number.isNaN(n));
 
     onCreate({
       title: title.trim(),
@@ -263,9 +263,8 @@ const RoomItem: React.FC<{
         </span>
 
         <button
-          className={`action-btn ${
-            canEnter ? "enter" : isPlaying ? "in-progress" : "disabled"
-          }`}
+          className={`action-btn ${canEnter ? "enter" : isPlaying ? "in-progress" : "disabled"
+            }`}
           disabled={!canEnter}
           onClick={() => canEnter && onEnter(room)}
         >
@@ -373,7 +372,7 @@ const LobbyPage: React.FC = () => {
 
     try {
       await joinBattleRoom(room.id);
-      
+
       navigate(`/battle/${room.id}`, {
         state: { roomId: room.id },
       });
@@ -413,22 +412,54 @@ const LobbyPage: React.FC = () => {
         problems: form.problems,
       };
 
-      const newRoom = await createBattleRoom(payload);
+      const created = await createBattleRoom(payload);
 
-      // 기존: 로비 리스트만 갱신
-      // setRooms((prev) => [newRoom, ...prev]);
-      // setIsModalOpen(false);
-
-      // ✅ 1) 모달 닫고
+      // 모달은 바로 닫기
       setIsModalOpen(false);
 
-      // ✅ 2) 로비 리스트에는 알아서 새로고침 버튼으로 다시 불러오게 두고
-      //     (원하면 setRooms 유지해도 상관 없음)
-      setRooms((prev) => [newRoom, ...prev]);
+      // 🔥 1차: createBattleRoom 응답에서 roomId 추출 시도
+      // (백엔드가 어떤 키를 쓰는지 모를 수 있으니 여러 케이스 방어)
+      let roomId: number | undefined =
+        (created as any).id ??
+        (created as any).room_id ??
+        (created as any).battle_room_id;
 
-      // ✅ 3) 방 만든 사람을 바로 해당 배틀 페이지로 보내기
-      navigate(`/battle/${newRoom.id}`, {
-        state: { roomId: newRoom.id },
+      // 🔥 2차: 응답에서 못 찾으면, 방 목록을 새로 불러와서 이 방을 찾아낸다
+      if (!roomId) {
+        const updatedRooms = await fetchBattleRooms();
+        setRooms(updatedRooms);
+
+        // title + roomType 기준으로 내가 방금 만든 방을 찾는다
+        // (동일 제목이 여러 개일 수 있으니, 가장 최근 id를 사용)
+        const candidates = updatedRooms.filter(
+          (r) => r.title === form.title && r.type === form.roomType
+        );
+
+        if (candidates.length === 0) {
+          alert(
+            "방은 생성되었지만 방 ID를 찾지 못했습니다. 새로고침 후 다시 시도해 주세요."
+          );
+          return;
+        }
+
+        const newest = candidates.sort((a, b) => b.id - a.id)[0];
+        roomId = newest.id;
+      } else {
+        // 응답에 id가 정상적으로 있었던 경우 로비 리스트에도 추가 (선택 사항)
+        setRooms((prev) => [created as Room, ...prev]);
+      }
+
+      // 🔒 그래도 roomId를 못 찾았다면 이동하지 않는다
+      if (!roomId) {
+        alert(
+          "방은 생성되었지만 방 ID를 찾지 못했습니다. 새로고침 후 다시 시도해 주세요."
+        );
+        return;
+      }
+
+      // ✅ 최종: 호스트를 곧바로 해당 배틀 방으로 이동
+      navigate(`/battle/${roomId}`, {
+        state: { roomId },
       });
     } catch (e) {
       console.error(e);
@@ -451,11 +482,10 @@ const LobbyPage: React.FC = () => {
 
         {userInfo ? (
           <div
-            className={`user-info-display ${
-              userInfo.tier
+            className={`user-info-display ${userInfo.tier
                 ? `tier-${userInfo.tier.toLowerCase().replace("+", "plus")}`
                 : ""
-            }`}
+              }`}
           >
             <span className="user-nickname">{userInfo.nickname}</span>
             {userInfo.tier && (
@@ -495,9 +525,8 @@ const LobbyPage: React.FC = () => {
             {(["전체", "코테", "미니"] as FilterType[]).map((type) => (
               <button
                 key={type}
-                className={`filter-btn ${
-                  filterType === type ? "active" : ""
-                }`}
+                className={`filter-btn ${filterType === type ? "active" : ""
+                  }`}
                 onClick={() => setFilterType(type)}
               >
                 {type}
@@ -509,9 +538,8 @@ const LobbyPage: React.FC = () => {
             {GRADE_FILTERS.map((grade) => (
               <button
                 key={grade}
-                className={`grade-btn ${
-                  gradeFilter === grade ? "active" : ""
-                }`}
+                className={`grade-btn ${gradeFilter === grade ? "active" : ""
+                  }`}
                 onClick={() => setGradeFilter(grade)}
               >
                 {grade}
