@@ -14,22 +14,17 @@ from pathlib import Path
 from datetime import timedelta
 import os
 import json
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# secrets.json에서 SECRET_KEY 로드
-SECRETS_FILE = BASE_DIR / 'secrets.json'
-try:
-    with open(SECRETS_FILE, 'r', encoding='utf-8') as f:
-        secrets = json.load(f)
-        SECRET_KEY = secrets.get('SECRET_KEY')
-        if not SECRET_KEY:
-            raise ValueError("SECRET_KEY가 secrets.json에 없습니다.")
-except FileNotFoundError:
-    raise FileNotFoundError(f"secrets.json 파일을 찾을 수 없습니다: {SECRETS_FILE}")
-except json.JSONDecodeError:
-    raise ValueError(f"secrets.json 파일의 JSON 형식이 올바르지 않습니다: {SECRETS_FILE}")
+SECRET_KEY = os.environ.get('SECRET_KEY')
+
+# SECRET_KEY가 환경 변수에 없으면 예외를 발생시켜 보안을 강화합니다.
+if not SECRET_KEY:
+    # 로컬 개발 시 .env 파일을 사용하거나, 배포 환경에서 설정하지 않으면 오류 발생
+    raise EnvironmentError("SECRET_KEY 환경 변수가 설정되지 않았습니다.")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -96,10 +91,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        # Render에서 DATABASE_URL 환경 변수를 넣어주면 자동 인식됩니다.
+        default='sqlite:///db.sqlite3', 
+        conn_max_age=600 
+    )
 }
 
 
@@ -138,6 +134,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# SSL 설정 (Render는 HTTPS를 사용하므로 필요합니다)
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -171,7 +173,4 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*', '.pythonanywhere.com']
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+CORS_ALLOWED_ORIGINS = True
