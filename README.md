@@ -1,73 +1,102 @@
-# React + TypeScript + Vite
+# Loop: 정보대학 1:1 코딩 배틀 리그
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🚀 프로젝트 소개 (Introduction)
 
-Currently, two official plugins are available:
+Loop은 정보대학 학생들의 코딩 및 전공 지식 학습 문제를 해결하기 위해 개발된 1:1 배틀 기반의 게임화된 교육 플랫폼입니다.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+기존 코딩 학습이 가지는 "지루함"과 그로 인한 공부 지속가능성 저하 문제를 경쟁으 전환하여 학습 동기를 극대화했습니다. Loop은 딱딱한 지식을 흥미로운 대결로 바꿔주는 맞춤형 교육 솔루션입니다.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🎯 핵심 기능 및 구현 상세 (Features)
 
-## Expanding the ESLint configuration
+### 1. Dual 배틀 시스템
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+실력과 지식을 동시에 테스트하는 두 가지 유형을 제공합니다.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+* **미니 퀴즈:** 전공 지식 기반의 4지선다 문제로, 즉각적인 개념 인출을 유도하는 능동적 학습 환경을 구축합니다.
+* **코딩 테스트 (KoTe):** 알고리즘 문제 해결 능력을 평가하며, 실시간 경쟁을 통해 몰입도를 높입니다.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 2. 게임화된 UX/UI (Gamified Experience)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+딱딱한 학습 플랫폼에서 벗어나 게임적인 요소를 차용하여 호기심과 몰입을 유발합니다.
+
+* **티어 및 랭킹:** 마이페이지에서 티어를 **학점 방식 (A+, B0 등)**으로 시각화하고, 정보대 상위 % 랭킹을 강조하여 경쟁 심리를 극대화합니다.
+* **직관적인 로비:** 사용자가 레벨과 문제 유형을 필터링하여 원하는 배틀 방을 손쉽게 찾을 수 있도록 설계했습니다.
+
+## ⚙️ 기술적 우수성 (Technical Excellence)
+
+Loop은 공정한 배틀 환경을 위한 고도화된 기술 시스템을 갖추고 있습니다.
+
+* **정교한 채점 및 공정성 확보:** 시간/공간 복잡도 기반 채점 시스템을 통해, 단순히 정답 여부만을 판단하지 않습니다. 시간 복잡도와 공간 복잡도를 모두 고려하는 정교한 채점 서버를 사용하여 효율적인 코드를 작성한 사용자에게 보상을 제공합니다.
+* **공정한 레이팅 시스템:** 이 결과를 바탕으로 공정한 레이팅 시스템을 운영하여, 모든 사용자에게 정확하고 신뢰할 수 있는 실력 평가를 제공합니다.
+
+### ✨ 확장성 및 사업 비전 (Vision & Practicality)
+Loop은 지속 가능한 서비스 모델을 목표로 합니다.
+
+외부 수익 및 확장 모델
+* **대학 연합 대전:** 정기적인 타 대학 연합 대전 계획을 수립하여 서비스 대상을 확장합니다.
+
+* **기업 스폰서십 유치:** IT 기업의 스폰서십을 유치하고 상금 및 채용 연계 혜택을 제공함으로써, Loop이 확보한 우수 인재 풀을 통해 채용 플랫폼으로 가치를 증명합니다.
+
+* **UGC 기반 콘텐츠 경제
+콘텐츠 자가 생산:** 사용자가 문제를 만들고 다른 사용자들의 좋아요 평가를 통해 베스트 출제자를 선정하여 리워드를 지급합니다. 이 선순환 구조를 통해 운영 비용을 절감하고 콘텐츠 품질과 양을 자가 생산하는 지속 가능한 생태계를 구축합니다.
+---
+
+## 💻 기술 스택 (Tech Stack)
+
+Loop 프로젝트 구현에 사용된 주요 기술 스택은 다음과 같습니다.
+
+* **Front-end:** React, TypeScript, Vite
+* **Back-end:** Django (Python), Django REST Framework (DRF)
+* **Database:** [MySQL, PostgreSQL, 또는 SQLite 중 택 1]
+* **핵심 인프라:** 채점 서버 연동 (Judge0 또는 자체 구현)
+
+---
+
+## 🖥️ 설치 및 실행 방법 (Setup & Installation)
+
+Loop 프로젝트를 로컬 환경에서 실행하기 위한 단계입니다. 프론트엔드와 백엔드를 동시에 실행해야 합니다.
+
+### 1. 저장소 클론 및 환경 설정
+
+```Bash
+# 저장소 클론
+git clone [저장소 주소]
+cd [프로젝트 폴더명]
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. 백엔드 (Django) 설정 및 실행
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1.  가상 환경 설정: Python 가상 환경을 생성하고 활성화합니다.
+    ```bash
+    python3 -m venv venv
+    source venv/bin/activate
+    ```
+2.  의존성 설치: 필요한 라이브러리(requirements.txt)를 설치합니다.
+    ```bash
+    pip install -r requirements.txt
+    ```
+3.  데이터베이스 설정: settings.py (또는 환경 설정 파일)에 DB 연결 정보를 설정합니다.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+4.  마이그레이션 적용 및 서버 실행:
+    ```bash
+    python manage.py makemigrations
+    python manage.py migrate
+    python manage.py runserver
+    # 서버가 http://127.0.0.1:8000 에서 실행됩니다.
+    ```
+
+### 3. 프론트엔드 (React) 설정 및 실행
+
+1.  프론트엔드 폴더로 이동 및 의존성 설치:
+    ```bash
+    cd loop-front # (프론트엔드 폴더명으로 변경)
+    npm install
+    ```
+2.  API 엔드포인트 설정: .env 파일에 Django 서버 주소 (예: VITE_API_URL=[http://127.0.0.1:8000](http://127.0.0.1:8000))를 설정합니다.
+3.  개발 서버 실행:
+    ```bash
+    npm run dev
+    # 개발 서버가 실행되어 브라우저에서 확인할 수 있습니다.
+    ```
