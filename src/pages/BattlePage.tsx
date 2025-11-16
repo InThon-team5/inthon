@@ -830,7 +830,7 @@ export default function BattlePage() {
                 setBattleResult(null);
 
                 // 🔥 메인 화면으로 이동 (원하면 "/lobby" 등으로 바꿔도 됨)
-                navigate("/lobby");
+                navigate("/");
               }}
             >
               확인
@@ -885,10 +885,7 @@ export default function BattlePage() {
               onClick={() => {
                 setBattleResult(null);
                 setStage("finished");
-
-                
-                navigate("/lobby");
-        
+                navigate("/");
               }}
             >
               확인
@@ -912,14 +909,18 @@ export default function BattlePage() {
               <button
                 type="button"
                 className="loop-secondary-btn"
-                onClick={() => setShowExitModal(false)}
+                onClick={() => { setShowExitModal(false); setStage("finished");
+                navigate("/"); }}
               >
                 계속 싸우기
               </button>
               <button
                 type="button"
                 className="loop-danger-btn"
-                onClick={handleConfirmExit}
+                onClick={() => {
+                  handleConfirmExit(); setStage("finished");
+                  navigate("/");
+                }}
               >
                 나가기
               </button>
