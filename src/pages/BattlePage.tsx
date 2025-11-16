@@ -97,7 +97,7 @@ export default function BattlePage() {
   const [showExitModal, setShowExitModal] = useState(false);
 
   // 폴링 중복 방지를 위한 ref
-  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pollingIntervalRef = useRef<number | null>(null);
 
   const currentQuestion = questions[currentIndex];
   const isPlaying = stage === "playing";
