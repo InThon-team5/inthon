@@ -405,13 +405,23 @@ const LobbyPage: React.FC = () => {
 
   const handleCreateRoom = async (form: CreateRoomForm) => {
     try {
-      const payload = {
+      const payload: {
+        title: string;
+        is_cote: boolean;
+        is_private: boolean;
+        private_password?: string;
+        problems: number[];
+      } = {
         title: form.title,
         is_cote: form.roomType === "코테",
         is_private: form.isPrivate,
-        private_password: form.privatePassword,
         problems: form.problems,
       };
+
+      // 비공개 방인 경우에만 private_password 포함
+      if (form.isPrivate && form.privatePassword) {
+        payload.private_password = form.privatePassword;
+      }
 
       const newRoom = await createBattleRoom(payload);
       setRooms((prev) => [newRoom, ...prev]);
